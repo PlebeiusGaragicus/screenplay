@@ -1,3 +1,13 @@
 {
-    "name": "goes here"
+  "name": "Cyberpunk Alley",
+  "description": "A short AI-generated comic sequence in a rainy cyberpunk alley.",
+  "version": "0.1.0",
+  "style": "cyberpunk-noir",
+  "characters": ["Hero"],
+  "locations": ["alley-night"],
+  "prompts": {
+    "characters": ["characters/Hero/hero-suit.md"],
+    "locations": ["locations/alley-night.md"],
+    "styles": ["styles/cyberpunk-noir.md"]
+  }
 }
