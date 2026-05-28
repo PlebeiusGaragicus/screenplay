@@ -1,17 +1,21 @@
 ---
 title: Prologue - Equestria Online
 characters: [James, David, Honeycrisp, Obsidian Stripe]
-locations: [Barn Interior, Forest Path, Zebra's Hut Clearing]
-prompts: ["characters/james.md", "characters/david.md", "characters/honeycrisp.md", "characters/obsidian-stripe.md", "locations/barn-interior.md", "locations/forest-path.md", "locations/zebra-hut.md", "styles/equestria-online.md"]
+locations: [Computer Lab, Barn Interior, Forest Path, Zebra's Hut Clearing]
+prompts: ["characters/james.md", "characters/david.md", "characters/honeycrisp.md", "characters/obsidian-stripe.md", "locations/computer-lab.md", "locations/barn-interior.md", "locations/forest-path.md", "locations/zebra-hut.md", "styles/equestria-online.md"]
 ---
 
 # Prologue: Equestria Online
 
 **[[prompts/styles/equestria-online.md]]**
 
-INT. COMPUTER LAB - NIGHT
+INT. COMPUTER LAB - NIGHT [[prompts/locations/computer-lab.md]]
 
-JAMES, a skeptical young man, sits at computer #12 next to his friend DAVID who has won a Hasbro raffle for Equestria Online alpha. The room is filled with other players starting their sessions. [[prompts/characters/james.md]]
+A sterile, humming computer lab in Pawtucket, Rhode Island. JAMES, a skeptical young man, sits at computer #12 next to his friend DAVID. 
+
+The room is filled with other players, all winners of a Hasbro raffle for the Equestria Online alpha. The atmosphere is electric with anticipation. [[prompts/characters/james.md]]
+
+James picks up his headset, looking doubtfully at the screen.
 
 JAMES
 Look, I’m glad you invited me. And it’s cool that I get to try something before anyone else. But I’m still not sure I really want to play a game that’s so...so...pink and purple.
@@ -38,73 +42,92 @@ James looks at his friend for several moments, then quietly agrees.
 JAMES
 Deal.
 
-James focuses on his screen: an extensive personality questionnaire. Favorite color: navy blue. Favorite food: pepper-jack cheese. David already has his pony on screen.
+James focuses on his screen: an extensive personality questionnaire. 
+"Favorite color?" -> Navy blue. 
+"Favorite food?" -> Pepper-jack cheese.
 
-Eighteen questions later, the screen fades. James chooses EARTH PONY class, seeing himself as a tank/herbalist.
+He peeks at David's monitor. David has skipped the test and already has a pony on screen.
+
+Eighteen questions later, the screen fades to black. James is presented with banners for Earth, Pegasus, and Unicorn ponies. He thinks of his WoW days—the tanking, the alchemy, the herbalism. 
+
+The description for EARTH PONY mentions they are the toughest class and good with plants. Despite David's warning that there would be "little, if any combat," James clicks EARTH PONY. He's going to be a tank.
 
 CUT TO:
 
 INT. BARN INTERIOR - NIGHT [[prompts/locations/barn-interior.md]]
 
-A gray earth pony with navy blue hair (JAMES's avatar) lies on straw. It turns and looks familiar. DAVID's excited voice comes through headset as a BLUE UNICORN appears.
+A gray earth pony with navy blue hair (JAMES's avatar) lies on straw. The pony turns and looks straight at the camera. James feels a strange sense of familiarity.
+
+DAVID'S voice comes through the headset, sounding surprised. A BLUE UNICORN walks onto the scene.
 
 DAVID (V.O.)
 Look at this! It’s me! As a pony!
 
-The ponies mimic their players' real-world actions via webcam face-mapping. James is impressed despite himself.
+The unicorn mimics David's excited expression with perfect lip-synching. James looks at David in the real world, then back at the screen. The unicorn starts making funny faces.
 
-HONEYC RISP, a red earth pony mare, enters with a bow. [[prompts/characters/honeycrisp.md]]
+James notices his own pony is now wearing an astonished expression. He raises a hand to scratch his head; on screen, the gray pony raises its hoof. 
+
+He realizes there's an embedded webcam in the monitor. He makes a series of faces, and the avatar mimics him perfectly.
+
+JAMES
+Okay, that’s kind of cool, I guess, but I don’t see how you’re going to build a game around it.
+
+HONEYCRISP, a red earth pony mare, enters with a small bow. [[prompts/characters/honeycrisp.md]]
 
 HONEYCRISP
 Howdy. My name’s Honeycrisp. So, I beg your pardon, but are y’all those new ponies we’ve been hearin’ all about?
 
 JAMES
+(mumbling)
 Uh...
 
 DAVID
 Why yes we are! We just came to Equestria! What do we do now?
 
-HONEYC RISP
+Honeycrisp laughs heartedly and trots up to James.
+
+HONEYCRISP
 It’s alright. I won’t hurt ya. So I reckon you don’t have a ponyname yet?
 
 JAMES
 Wait, you can understand us?
 
-HONEYC RISP
+HONEYCRISP
 I sure can, sugarcube.
 
 JAMES
 Your name is...Honeycrisp?
 
-HONEYC RISP
+HONEYCRISP
 Sure is! I take care of the farm. Whelp, the two of ya’ better get started. You gotta get along to Canterlot. Don’t worry, Princess Celestia will give y’all pretty ponynames. Can’t be walkin’ round these parts callin’ yourself ‘James’ and ‘David’ now, can ya?
 
 JAMES
 Wait, how did you know my name?
 
+James pulls one headphone cup off his ear to listen to the room. He hears David's voice both in the headset and in the air.
+
 DAVID
 Of course they know our names. We filled out those forms at the front desk to get our accounts.
 
-HONEYC RISP
+HONEYCRISP
 Oh, you’ll find that Princess Celestia knows all ‘bout y’all new pony folk who’ve been comin’ to these parts. I was givin’ a list of names and got lucky.
 
-JAMES (to David, aside)
-What the hell... she understood everything.
+With his right ear uncovered, James hears other players in the room reacting with similar disbelief: "Wait, you can understand me?" But he doesn't hear any southern drawls coming from the people around him. He puts the headphone back on.
 
-HONEYC RISP
+JAMES
 So how do we get to this...Canterlot place?
 
-HONEYC RISP
+HONEYCRISP
 Go right out this door and through the forest. There ain’t any monsters round these parts. Just follow the path and you’ll be on the main road to Canterlot.
 
 JAMES
 Thank you.
 
-James' pony gives a little bow, unprompted. They exit into the night.
+James' pony gives a little bow, unprompted. James blinks—he didn't press any button. They exit into the night.
 
 EXT. FOREST PATH AT NIGHT - CONTINUOUS [[prompts/locations/forest-path.md]]
 
-The two ponies walk, marveling at the unique, high-detail environment - no copy-pasted trees. James notes the production values but suspects standard RPG questing.
+The two ponies walk through a high-detail forest. No copy-pasted trees; each branch structure is unique. The rocks and logs are placed naturally, the path irregularly worn. James is genuinely impressed by the production values.
 
 JAMES
 Man, I’ll give you one thing: the production values are through the roof. Still, this looks like it’s turning into a standard RPG. Quest giving NPC tells us to go from point A to B.
@@ -112,29 +135,44 @@ Man, I’ll give you one thing: the production values are through the roof. Stil
 DAVID
 Except we had to actually talk to the quest giving NPC. In a normal MMO, we’d have clicked on the pony with the exclamation point above its head, and then clicked on the accept button. But here, the game mechanic seems to be talking. All the face mapping makes sense if this game is about conversation.
 
-They spot a hut and approach.
+James' mouth opens and closes slightly.
+
+DAVID
+Also, I don’t see an action bar along the bottom of the screen. If you press ‘1’ on your keyboard, I bet nothing happens.
+
+They continue until they reach a small clearing with a hut emitting light. James trots over.
 
 INT. ZEBRA'S HUT CLEARING - NIGHT [[prompts/locations/zebra-hut.md]]
 
-OBSIDIAN STRIPE, a zebra herbalist, tends her cauldron and speaks in rhyme. [[prompts/characters/obsidian-stripe.md]]
+OBSIDIAN STRIPE, a zebra herbalist, is sorting herbs from piles on a low table into a bubbling aquamarine cauldron. She looks up as they approach. [[prompts/characters/obsidian-stripe.md]]
 
 OBSIDIAN STRIPE
 Ponies trotting through the night. Would you care to step into the light?
+
+James moves closer to the hovel.
+
+OBSIDIAN STRIPE
+Obsidian Stripe tends to her flame. My little ponies, what are your names?
 
 JAMES
 My name is James.
 
 OBSIDIAN STRIPE
+(serious)
 I’m sure out there you have great fame. But while in here, speak not that name.
 
 DAVID
 We don’t have ponynames yet.
+
+Obsidian Stripe nods to herself.
 
 OBSIDIAN STRIPE
 Two ponies on a midnight trot. Do you make for Canterlot?
 
 JAMES
 Yes, I’m going through the introductory quest chain.
+
+Obsidian Stripe tilts her head as if James has gone crazy.
 
 OBSIDIAN STRIPE
 I know you see me through a frame, but from this side, this is no game.
@@ -149,15 +187,21 @@ JAMES
 I’ve seen those pink flowers all around the forest. Can I gather them and do something with them?
 
 OBSIDIAN STRIPE
-This is the pinkdaisy, fragrant and fair. Pinkdaisy grows just about everywhere. In the forest and the field, you will have a bountiful yield. My brew must cook with a slow burn. I have some time to help you learn. Do not worry; you do not disturb. Would you like to learn the simple herbs?
+This is the pinkdaisy, fragrant and fair. Pinkdaisy grows just about everywhere. In the forest and the field, you will have a bountiful yield. 
+
+She points to a pile of destemmed pink flowers.
+
+OBSIDIAN STRIPE
+My brew must cook with a slow burn. I have some time to help you learn. Do not worry; you do not disturb. Would you like to learn the simple herbs?
 
 JAMES
 Yes, please train me in herbalism.
 
 OBSIDIAN STRIPE
+(laughing)
 Please focus on the here and now. We do not aim to awe and wow.
 
-The zebra introduces queensfoil, thyme, mint and blueshroom. James and David loot samples.
+Obsidian introduces queensfoil, thyme, mint and blueshroom one by one. James and David click each pile, looting samples into their saddlebags.
 
 JAMES
 And how do I combine them into potions like you’re making?
@@ -165,15 +209,23 @@ And how do I combine them into potions like you’re making?
 OBSIDIAN STRIPE
 How to brew will remain unsaid. First learn to gather plants instead.
 
+James nods, an action mirrored by his avatar.
+
 JAMES
 Okay, sure. Thanks.
+
+As they walk away, Obsidian calls out one last time.
 
 OBSIDIAN STRIPE
 Though I will sit here and remain, I hope you find your ponynames.
 
-Obsidian gives them a small wave and mutters about adding more thyme.
+She gives a small wave and returns to her cauldron.
 
-The ponies walk through the forest in silence.
+OBSIDIAN STRIPE
+(muttering)
+Oh dear, oh my. This will not do. I must add more thyme to the brew.
+
+The earth pony and unicorn walk through the forest in silence for a minute.
 
 JAMES
 What the hell.
@@ -188,7 +240,15 @@ DAVID
 And? You’ve played The Fall of Asgard. Hofvarpnir Studios is just really good at what they do.
 
 JAMES
-No. Asgard had really good AI for the enemies, but it was still fundamentally a first person action game. This is something totally new. I can’t think of any games based on completely free-form conversation. You don’t just invent a completely new genre with only a year of development. And one of the reasons we have genres is because it lets us find works we’d like easier. Will anyone want to play this? Conversation is nice, but what’s it going to do for my stats?
+(shaking head emphatically)
+No. Asgard had really good AI for the enemies, but it was still fundamentally a first person action game. This is something totally new. I can’t think of any games based on completely free-form conversation. You don’t just invent a completely new genre with only a year of development. 
+
+He pauses.
+
+JAMES
+And one of the reasons we have genres is because it lets us find works we’d like easier. Will anyone want to play this? Conversation is nice, but what’s it going to do for my stats?
+
+David's unicorn rolls his eyes.
 
 DAVID
 Says the party animal to the guy who doesn’t get out much. And I’d love to see my numbers go up, but being among ponies is sort of a dream come true for me.
