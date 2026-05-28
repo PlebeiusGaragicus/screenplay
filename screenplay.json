@@ -1,13 +1,13 @@
 {
-  "name": "Cyberpunk Alley",
-  "description": "A short AI-generated comic sequence in a rainy cyberpunk alley.",
-  "version": "0.1.0",
-  "style": "cyberpunk-noir",
-  "characters": ["Hero"],
-  "locations": ["alley-night"],
+  "name": "Equestria Online Prologue",
+  "description": "Adaptation of the Equestria Online prologue featuring James, David and early NPCs in a verbose screenplay format.",
+  "version": "0.2.0",
+  "style": "equestria-online",
+  "characters": ["James", "David", "Honeycrisp", "Obsidian Stripe"],
+  "locations": ["Barn Interior", "Forest Path", "Zebra's Hut Clearing"],
   "prompts": {
-    "characters": ["characters/Hero/hero-suit.md"],
-    "locations": ["locations/alley-night.md"],
-    "styles": ["styles/cyberpunk-noir.md"]
+    "characters": ["characters/james.md", "characters/david.md", "characters/honeycrisp.md", "characters/obsidian-stripe.md"],
+    "locations": ["locations/barn-interior.md", "locations/forest-path.md", "locations/zebra-hut.md"],
+    "styles": ["styles/equestria-online.md"]
   }
 }
