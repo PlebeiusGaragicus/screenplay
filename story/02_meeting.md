@@ -1,11 +1,12 @@
 ---
-scene: first-meeting
+Title: Cyberpunk Alley
+Description: 
 ---
 
 INT. SAME ALLEY - MOMENTS LATER
 
-[[character:Hero]] encounters a mysterious figure.
+[[Case-suit]] encounters a mysterious figure.
 
 Tension rises as [[mood:tense]] lighting intensifies.
 
-He reaches for [[prop:magic-amulet]] again.
+He reaches for [[cyber-amulet]] again.
