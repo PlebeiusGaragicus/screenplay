@@ -1,0 +1,1 @@
+Screenplay adaptation of "Friendship is Optimal" (Equestria Online prologue) following the AI video/comic book generation workflow defined in [AGENTS.md](./AGENTS.md).
