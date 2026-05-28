@@ -1,4 +1,4 @@
-# AGENTS.md — Screenplay / Comic Generation Project
+# AGENTS.md - Comic/Video Generation Project
 
 ## Overview
 
@@ -13,41 +13,12 @@ All content files utilize YAML frontmatter.
 ## Core Rules
 - All story/*.md and prompts/*.md files use Fountain format + `[[wiki-style links]]`.
 - Include YAML frontmatter at the top of every content file.
-- Include YAML frontmatter at the top of every content file.
-
 - Story files live in ./story/; reusable prompts/descriptions in ./prompts/ (with subdirs for characters/, locations/, styles/, etc.).
 - Generated/reference images go in ./images/.
 
-## Workflow — Full Pipeline
+# Workflow — Screenplay / Comic / Video Pipeline
 
-1. **Ingest Original Story**
-   - Place raw/clean source in `story/origional/*.md`.
-
-2. **Extract Reusable Prompts**
-   - Pull characters, locations, styles into `prompts/{characters,locations,styles}/*.md` with YAML frontmatter.
-   - Use `[[wiki-style links]]` in story files.
-
-3. **Adapt into Screenplay**
-   - Create Fountain-flavored versions in `story/adapted/*.md` with YAML frontmatter and links.
-
-4. **Generate Reference Images (Iterative)**
-   - Use `prompts/*.md` as base prompts for image models.
-   - Iterate until consistent; store finals in `images/`.
-
-5. **Build Storyboard**
-   - Create `storyboard/*.md` files (one per scene/panel).
-   - Each combines character + location + style prompts + specific visual direction for comic/video generation.
-
-6. **Generate & Assemble**
-   - Feed storyboard prompts to image/video models.
-   - Outputs go in `images/`.
-
-Use consistent naming (kebab-case files, Title Case keys). Prefer short, focused edits. Update this file when new conventions are introduced.
-
-
-# Workflow — Equestria Online Screenplay / Comic / Video Pipeline
-
-This document outlines the end-to-end process for turning source material into AI-generated comics or videos using the repo conventions.
+We outline the end-to-end process for turning source material into AI-generated comics or videos using the repo conventions.
 
 ## High-Level Stages
 
