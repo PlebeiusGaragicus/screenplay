@@ -2,25 +2,25 @@
 title: Prologue - Equestria Online
 characters: [James, David, Honeycrisp, Obsidian Stripe]
 locations: [Computer Lab, Barn Interior, Forest Path, Zebra's Hut Clearing]
-prompts: ["characters/james.md", "characters/david.md", "characters/honeycrisp.md", "characters/obsidian-stripe.md", "locations/computer-lab.md", "locations/barn-interior.md", "locations/forest-path.md", "locations/zebra-hut.md", "styles/equestria-online.md"]
+prompts: ["characters/james/james.md", "characters/david/david.md", "characters/honeycrisp/honeycrisp.md", "characters/obsidian-stripe/obsidian-stripe.md", "locations/computer-lab.md", "locations/barn-interior/barn-interior.md", "locations/forest-path/forest-path.md", "locations/zebra-hut/zebra-hut.md", "styles/equestria-online/equestria-online.md"]
 ---
 
 # Prologue: Equestria Online
 
-**[[prompts/styles/equestria-online.md]]**
+**[[prompts/styles/equestria-online/equestria-online.md]]**
 
-INT. COMPUTER LAB - NIGHT [[prompts/locations/computer-lab.md]]
+INT. COMPUTER LAB - NIGHT [[prompts/locations/computer-lab/computer-lab.md]]
 
 A sterile, humming computer lab in Pawtucket, Rhode Island. JAMES, a skeptical young man, sits at computer #12 next to his friend DAVID. 
 
-The room is filled with other players, all winners of a Hasbro raffle for the Equestria Online alpha. The atmosphere is electric with anticipation. [[prompts/characters/james.md]]
+The room is filled with other players, all winners of a Hasbro raffle for the Equestria Online alpha. The atmosphere is electric with anticipation. [[prompts/characters/james/james.md]]
 
 James picks up his headset, looking doubtfully at the screen.
 
 JAMES
 Look, I’m glad you invited me. And it’s cool that I get to try something before anyone else. But I’m still not sure I really want to play a game that’s so...so...pink and purple.
 
-DAVID scoffs with a wide grin. [[prompts/characters/david.md]]
+DAVID scoffs with a wide grin. [[prompts/characters/david/david.md]]
 
 DAVID
 I know you. What was that Korean MMO with the little girls that you were so into? You’ll be running dungeons over and over again, just like you always do with every MMO that comes out. But me? I’m here for the ponies. We both get what we want!
@@ -54,7 +54,7 @@ The description for EARTH PONY mentions they are the toughest class and good wit
 
 CUT TO:
 
-INT. BARN INTERIOR - NIGHT [[prompts/locations/barn-interior.md]]
+INT. BARN INTERIOR - NIGHT [[prompts/locations/barn-interior/barn-interior.md]]
 
 A gray earth pony with navy blue hair (JAMES's avatar) lies on straw. The pony turns and looks straight at the camera. James feels a strange sense of familiarity.
 
@@ -72,7 +72,7 @@ He realizes there's an embedded webcam in the monitor. He makes a series of face
 JAMES
 Okay, that’s kind of cool, I guess, but I don’t see how you’re going to build a game around it.
 
-HONEYCRISP, a red earth pony mare, enters with a small bow. [[prompts/characters/honeycrisp.md]]
+HONEYCRISP, a red earth pony mare, enters with a small bow. [[prompts/characters/honeycrisp/honeycrisp.md]]
 
 HONEYCRISP
 Howdy. My name’s Honeycrisp. So, I beg your pardon, but are y’all those new ponies we’ve been hearin’ all about?
@@ -125,7 +125,7 @@ Thank you.
 
 James' pony gives a little bow, unprompted. James blinks—he didn't press any button. They exit into the night.
 
-EXT. FOREST PATH AT NIGHT - CONTINUOUS [[prompts/locations/forest-path.md]]
+EXT. FOREST PATH AT NIGHT - CONTINUOUS [[prompts/locations/forest-path/forest-path.md]]
 
 The two ponies walk through a high-detail forest. No copy-pasted trees; each branch structure is unique. The rocks and logs are placed naturally, the path irregularly worn. James is genuinely impressed by the production values.
 
@@ -142,9 +142,9 @@ Also, I don’t see an action bar along the bottom of the screen. If you press �
 
 They continue until they reach a small clearing with a hut emitting light. James trots over.
 
-INT. ZEBRA'S HUT CLEARING - NIGHT [[prompts/locations/zebra-hut.md]]
+INT. ZEBRA'S HUT CLEARING - NIGHT [[prompts/locations/zebra-hut/zebra-hut.md]]
 
-OBSIDIAN STRIPE, a zebra herbalist, is sorting herbs from piles on a low table into a bubbling aquamarine cauldron. She looks up as they approach. [[prompts/characters/obsidian-stripe.md]]
+OBSIDIAN STRIPE, a zebra herbalist, is sorting herbs from piles on a low table into a bubbling aquamarine cauldron. She looks up as they approach. [[prompts/characters/obsidian-stripe/obsidian-stripe.md]]
 
 OBSIDIAN STRIPE
 Ponies trotting through the night. Would you care to step into the light?
