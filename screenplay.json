@@ -1,7 +1,7 @@
 {
   "name": "Equestria Online Prologue",
   "description": "Adaptation of the Equestria Online prologue featuring James, David and early NPCs in a verbose screenplay format.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "style": "equestria-online",
   "characters": ["James", "David", "Honeycrisp", "Obsidian Stripe"],
   "locations": ["Barn Interior", "Forest Path", "Zebra's Hut Clearing"],
