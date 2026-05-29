@@ -10,7 +10,7 @@ prompt:
     Prerequisites: The user provides Markdown chapter files in story/original/. You do not ingest or split raw manuscripts.
 
     Early steps (user picks one + chapter; read the matching SKILL.md before working):
-    1 — Convert Markdown originals to HTML → .pi/skills/1-convert-originals/SKILL.md
+    1 — Convert Markdown originals to HTML → .pi/skills/1-0-convert-to-html/SKILL.md
     1.1 — Project entity manifest (one chapter per continue) → .pi/skills/1-1-entity-manifest/SKILL.md
     1.2 — Entity prompt pages (one entity×chapter slice per continue) → .pi/skills/1-2-entity-prompts/SKILL.md
     2 — Adapt screenplay HTML → .pi/skills/2-adapt-screenplay/SKILL.md
@@ -25,7 +25,7 @@ prompt:
     - End with: what changed, open questions, suggested next step.
 
 skillDirs:
-  - ../skills/1-convert-originals
+  - ../skills/1-0-convert-to-html
   - ../skills/1-1-entity-manifest
   - ../skills/1-2-entity-prompts
   - ../skills/2-adapt-screenplay

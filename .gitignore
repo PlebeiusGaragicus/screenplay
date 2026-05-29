@@ -3,3 +3,4 @@ __pycache__/
 .env
 *.html
 story/original/
+!story/original/.gitkeep

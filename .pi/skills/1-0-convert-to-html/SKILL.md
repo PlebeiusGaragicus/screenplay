@@ -1,5 +1,5 @@
 ---
-name: 1-convert-originals
+name: 1-0-convert-to-html
 description: Convert user-provided Markdown originals into stable source HTML with paragraph anchors. Use when the user requests Step 1 or Markdown-to-HTML conversion for story originals.
 ---
 
@@ -22,14 +22,19 @@ Convert `story/original/<chapter>.md` into `story/html/<chapter>.html` without s
 From the repository root:
 
 ```bash
-.pi/skills/1-convert-originals/scripts/md-to-html story/original/0-prologue.md
+.pi/skills/1-0-convert-to-html/scripts/md-to-html story/original/0-prologue.md
 ```
 
 The script may also be run for every Markdown file in `story/original/`:
 
 ```bash
-.pi/skills/1-convert-originals/scripts/md-to-html
+.pi/skills/1-0-convert-to-html/scripts/md-to-html
 ```
+
+## After converting
+
+- **Do not** read, summarize, or review the generated HTML in the same run. Conversion is complete once the script exits successfully.
+- The user opens and checks `story/html/<chapter>.html` in a browser (or via `./read`) before starting Step 1.1.
 
 ## HTML contract
 
@@ -49,4 +54,10 @@ Generated source HTML should be simple and deterministic:
 
 ## Done when
 
-The HTML file exists under `story/html/`, preserves the source prose order, and contains stable paragraph anchors for later provenance links.
+The HTML file exists under `story/html/`, preserves the source prose order, and contains stable paragraph anchors for later provenance links. Stop there—do not continue into later pipeline steps unless the user asks.
+
+## User Prompt
+
+**User:** `@$`
+
+---
