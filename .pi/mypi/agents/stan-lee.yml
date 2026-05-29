@@ -11,8 +11,8 @@ prompt:
 
     Early steps (user picks one + chapter; read the matching SKILL.md before working):
     1 — Convert Markdown originals to HTML → .pi/skills/1-convert-originals/SKILL.md
-    1.1 — Entity manifest → .pi/skills/1.1-entity-manifest/SKILL.md
-    1.2 — Entity prompt HTML pages → .pi/skills/1.2-entity-prompts/SKILL.md
+    1.1 — Project entity manifest (one chapter per continue) → .pi/skills/1.1-entity-manifest/SKILL.md
+    1.2 — Entity prompt pages (one entity×chapter slice per continue) → .pi/skills/1.2-entity-prompts/SKILL.md
     2 — Adapt screenplay HTML → .pi/skills/2-adapt-screenplay/SKILL.md
 
     Later visual phases are intentionally out of scope for this preset until the user asks to design them.

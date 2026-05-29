@@ -1,38 +1,95 @@
 ---
 name: 1.2-entity-prompts
-description: Create entity prompt HTML pages from an approved chapter entity manifest. Use when the user requests Step 1.2 or entity prompt page creation.
+description: Build entity prompt pages from the project manifest, one entity×chapter slice per run. Use for Step 1.2 or continue for the next slice.
 ---
 
-# Step 1.2 — Entity prompt pages
+# Step 1.2 — Entity prompt pages (project-wide)
 
 ## Goal
 
-Create one grounded HTML prompt page per approved manifest item, with source quotes and links back to chapter paragraphs. Step 1.2 is where descriptions are actually extracted and written.
+One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one section per chapter** for evidence (and chapter-scoped description where useful). Each run processes exactly **one (entity, chapter) slice**: extract visual descriptions, behaviors, moods, costumes, voice, atmosphere, and variants from that chapter’s source HTML only.
 
 ## Inputs
 
-- `story/html/<chapter>.html`
-- `story/adapted/<chapter>-entities.html`
+- `story/adapted/entities.html`
+- `story/html/<chapter>.html` for the slice’s chapter
 - Optional: `story/adapted/<chapter>-screenplay.html`
 
 ## Output
 
-- `prompts/<entity>/<entity>-base.html`
+- Created or updated `prompts/<slug>/<slug>-base.html`
+- Updated manifest: **Name** link (when file is first created) and **Chapters** `<li>` marked slice-done for this chapter
 
-Use `-base.html` for the first stable version. Add another version only when the user explicitly wants a separate prompt variant.
+**Retired:** do not read or write `story/adapted/<chapter>-entities.html`.
 
-## Rules
+## Manifest link contract (shared with Step 1.1)
 
-- Iterate through manifest rows one item at a time. The next item is the first manifest name link whose target prompt file does not exist yet.
-- The presence of the linked prompt file means that item is complete; after creating the page, ensure the manifest link points to the finished file.
-- Ground every description in source evidence linked to paragraph anchors.
-- Keep inference separate from direct evidence.
-- Record variants (alternate forms, costumes, states, ages, etc.) in a visible section; do not overwrite the base identity silently.
-- Link back to the manifest row and source paragraphs.
-- Use the manifest's first appearance / mention as the starting point, then search the source chapter for all paragraphs that materially describe or clarify that item.
-- For **characters**, emphasize appearance, mood, behavior, voice, posture, and recurring mannerisms. Do not turn the page into a plot summary.
-- For **scenes/locations**, describe layout, atmosphere, lighting, materials, and fixtures listed in the manifest. Fixtures remain part of the scene page unless the manifest explicitly promotes them to props.
-- For **props**, describe portable or reusable objects that need independent prompting across scenes.
+| Signal | Meaning |
+|--------|---------|
+| Plain **Name** | No `prompts/<slug>/<slug>-base.html` yet |
+| Linked **Name** | Prompt file exists (entity “opened”) — link as soon as the file is created, not when all slices are done |
+| `<li data-chapter="…">` without `data-slice-done` | Slice pending |
+| `<li data-chapter="…" data-slice-done="true">` | Slice complete |
+
+**Pending chapter ref (Step 1.1):**
+
+```html
+<li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
+```
+
+**Slice done (Step 1.2)** — primary link points at the evidence section on the prompt page; keep source paragraph in parentheses:
+
+```html
+<li data-chapter="0-prologue" data-slice-done="true">
+  <a href="../../prompts/james/james-base.html#evidence-0-prologue">0-prologue</a>
+  (<a href="../html/0-prologue.html#p-001">p-001</a>)
+</li>
+```
+
+## Continue workflow (Step 1.2)
+
+1. Open `story/adapted/entities.html`.
+2. Walk **Created entities** tables in order: **Characters** → **Scenes** → **Props** → **Styles**.
+3. For each row, walk `<ul class="chapter-refs">` items in chapter slug order (`data-chapter`).
+4. **Next slice** = first `<li>` **without** `data-slice-done="true"` whose evidence section is missing or empty in the prompt file (`#evidence-<chapter>` or `section.evidence[data-chapter="<chapter>"]`).
+5. Read slug from `id="entity-<slug>"`; read chapter from `data-chapter` on that `<li>`.
+6. Process **one** slice, then stop. Tell the user to say **continue** for the next slice.
+
+Optional: user may restrict to one entity (`continue 1.2 for james`) — only consider `<li>` elements on that row.
+
+**Step 1.2 complete** when every `<li class="chapter-refs">` (across all rows) has `data-slice-done="true"` and a non-empty evidence section on the prompt page.
+
+If **continue** finds no pending slices, report Step 1.2 complete for the project.
+
+## Per-slice workflow
+
+1. Resolve entity slug and chapter slug from the manifest row.
+2. Read `story/html/<chapter>.html` (full chapter; focus on paragraphs relevant to this entity).
+3. If `prompts/<slug>/<slug>-base.html` does not exist, create it from the template (header, empty variants/inferences as needed).
+4. Add or replace `section.evidence[data-chapter="<chapter>"]` with `id="evidence-<chapter>"` and ordered blockquotes.
+5. Add or update `section.description[data-chapter="<chapter>"]` with a polished summary for **this chapter’s** material (project-wide description can synthesize later slices in place or in the same section—prefer one description section per chapter when the entity spans multiple chapters).
+6. Update **Variants** / **Fixtures** / **Inferences** when this chapter adds new forms or set dressing.
+7. If the file was just created, set **Name** to a link in the manifest.
+8. Set the chapter `<li>` to `data-slice-done="true"` with links as in the contract above.
+
+Do not batch multiple slices unless the user explicitly asks.
+
+## Source extraction (this chapter only)
+
+- Ground claims in **Evidence** blockquotes with links to `story/html/<chapter>.html#p-xxx`.
+- Order blockquotes by paragraph id within the chapter section.
+- Keep **Inferences** separate from stated facts.
+- No plot summaries—only depiction-relevant detail.
+
+### By entity type
+
+**Characters** — appearance, costumes/alternate forms, mood, behavior, posture, voice, mannerisms.
+
+**Scenes** — layout, atmosphere, lighting, materials; expand manifest **Fixtures** for this chapter.
+
+**Props** — form, materials, scale, handling.
+
+**Styles** — art direction when the row is `data-type="style"`.
 
 ## Entity page template
 
@@ -53,64 +110,66 @@ Use `-base.html` for the first stable version. Add another version only when the
         <dt>Type</dt>
         <dd>character</dd>
         <dt>Manifest</dt>
-        <dd><a href="../../story/adapted/0-prologue-entities.html#entity-james">0-prologue entity manifest</a></dd>
+        <dd><a href="../../story/adapted/entities.html#entity-james">Entity manifest</a></dd>
       </dl>
     </header>
 
-    <section class="evidence">
-      <h2>Evidence</h2>
+    <section class="evidence" data-chapter="0-prologue" id="evidence-0-prologue">
+      <h2>Evidence — 0-prologue</h2>
       <blockquote cite="../../story/html/0-prologue.html#p-001">
-        <p>Brief source quote.</p>
+        <p>Brief quote.</p>
         <footer><a href="../../story/html/0-prologue.html#p-001">0-prologue p-001</a></footer>
       </blockquote>
     </section>
 
-    <section class="description">
-      <h2>Description</h2>
-      <p>Grounded visual and story-relevant description.</p>
+    <section class="description" data-chapter="0-prologue">
+      <h2>Description — 0-prologue</h2>
+      <p>Chapter-scoped illustration-ready summary.</p>
     </section>
 
     <section class="fixtures">
       <h2>Fixtures</h2>
-      <p>Use this section for scene/location pages only. List fixed scene elements such as furniture, architecture, workstations, lighting sources, and local set dressing.</p>
+      <p>Scene entities: chapter-specific fixture detail when applicable.</p>
     </section>
 
     <section class="variants">
       <h2>Variants</h2>
-      <ul>
-        <li><strong>Base:</strong> Default appearance and identity.</li>
-      </ul>
+      <ul><li><strong>Human:</strong> …</li></ul>
     </section>
 
     <section class="inferences">
       <h2>Inferences</h2>
-      <p>Clearly label any visual detail inferred from context rather than stated directly.</p>
+      <p>Labeled inferences only.</p>
     </section>
   </article>
 </body>
 </html>
 ```
 
+Additional chapters append new `section.evidence` / `section.description` blocks with matching `data-chapter` and `id="evidence-<chapter>"`.
+
 ## Path convention
 
-From `prompts/<entity>/<entity>-base.html`:
+From `prompts/<slug>/<slug>-base.html`:
 
-- Source chapter links usually look like `../../story/html/<chapter>.html#p-001`.
-- Manifest links usually look like `../../story/adapted/<chapter>-entities.html#entity-<slug>`.
-- Related prompt page links usually look like `../<other-entity>/<other-entity>-base.html`.
+- Source: `../../story/html/<chapter>.html#p-xxx`
+- Manifest: `../../story/adapted/entities.html#entity-<slug>`
+- Other entities (if linked): `../<other-slug>/<other-slug>-base.html`
 
-## Iteration checklist
+## Per-run checklist
 
-For the next unfinished manifest row:
+1. Find next pending slice in `entities.html`.
+2. Write or update evidence (and description) for that chapter on the prompt page.
+3. Link **Name** if the file was just created.
+4. Mark the chapter `<li>` with `data-slice-done="true"`.
+5. Stop; suggest **continue** for the next slice.
 
-1. Follow the linked prompt-page path from the manifest name cell.
-2. If the target file already exists, skip it and move to the next manifest row.
-3. Start from the first appearance / mention paragraph.
-4. Search the source chapter for additional relevant paragraphs.
-5. Write the prompt page with evidence quotes, grounded description, variants, fixtures, and clearly labeled inferences.
-6. Verify the manifest name link points to the prompt page you created.
-7. Stop unless the user explicitly asked you to process multiple items in one run.
+## Done when (project)
 
-## Done when
+Every `chapter-refs` item has `data-slice-done="true"`, each linked **Name** resolves to an existing prompt file, and each slice has a non-empty `#evidence-<chapter>` section.
 
-Every manifest row has a corresponding prompt page, each page links back to its manifest row plus at least one source paragraph, and scene pages incorporate their manifest fixtures rather than spawning unnecessary prop pages.
+## User Prompt
+
+**User:** `@$`
+
+---

@@ -12,7 +12,7 @@ Adapt a source chapter into navigable, semantic screenplay HTML linked to the en
 ## Inputs
 
 - `story/html/<chapter>.html`
-- `story/adapted/<chapter>-entities.html`
+- `story/adapted/entities.html` (project manifest; entities that appear in this chapter)
 
 ## Output
 
@@ -41,7 +41,7 @@ Adapt a source chapter into navigable, semantic screenplay HTML linked to the en
   <main class="screenplay" data-chapter="0-prologue">
     <h1>0-prologue Screenplay</h1>
     <p>Source: <a href="../html/0-prologue.html">story/html/0-prologue.html</a></p>
-    <p>Entities: <a href="0-prologue-entities.html">0-prologue-entities.html</a></p>
+    <p>Entities: <a href="entities.html">story/adapted/entities.html</a></p>
 
     <section class="scene" id="scene-computer-lab-night">
       <h2 class="scene-heading">INT. COMPUTER LAB - NIGHT</h2>
