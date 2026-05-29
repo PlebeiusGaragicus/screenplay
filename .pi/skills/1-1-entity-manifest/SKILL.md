@@ -1,5 +1,5 @@
 ---
-name: 1.1-entity-manifest
+name: 1-1-entity-manifest
 description: Merge one chapter into the project entity manifest. Use for Step 1.1, entity listing, or continue to scan the next unscanned chapter.
 ---
 

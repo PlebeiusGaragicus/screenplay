@@ -1,5 +1,5 @@
 ---
-name: 1.2-entity-prompts
+name: 1-2-entity-prompts
 description: Build entity prompt pages from the project manifest, one entity×chapter slice per run. Use for Step 1.2 or continue for the next slice.
 ---
 
