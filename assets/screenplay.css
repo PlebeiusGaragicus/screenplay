@@ -175,8 +175,11 @@ footer {
   border-width: 2px;
 }
 
-.pipeline-next[data-step="1.1"]:not(:empty)::before,
-#pipeline-next-1-2:not(:empty)::before {
+.pipeline-next[data-step="1b"]:not(:empty)::before,
+.pipeline-next[data-step="1c"]:not(:empty)::before,
+.pipeline-next[data-step="2a"]:not(:empty)::before,
+.pipeline-next[data-step="2b"]:not(:empty)::before,
+.pipeline-next[data-step="2c"]:not(:empty)::before {
   font-weight: 600;
 }
 
@@ -334,4 +337,186 @@ ul.fixtures {
 .screenplay .dialogue {
   margin: 0 2rem 1rem;
   max-width: 32rem;
+}
+
+/* —— Scene manifest —— */
+
+.scene-manifest .scene-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  border: 2px solid var(--border-strong);
+  margin: 0.75rem 0 1.5rem;
+}
+
+.scene-manifest .scene-table th,
+.scene-manifest .scene-table td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.scene-manifest .scene-table th {
+  background: #ebe4d9;
+}
+
+.scene-manifest .scene-table tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
+.scene-manifest .source-refs {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.scene-manifest ul.moment-refs {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.scene-manifest ul.moment-refs li[data-moment-done="true"]::before {
+  content: "✓ ";
+  color: var(--done);
+  font-weight: 700;
+}
+
+.scene-manifest ul.moment-refs li:not([data-moment-done="true"])::before {
+  content: "○ ";
+  color: var(--pending);
+}
+
+.scene-manifest .done {
+  color: var(--done);
+  font-weight: 600;
+}
+
+/* —— Scene packs —— */
+
+.scene-pack .scene-pack-meta {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.scene-pack .slug {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.scene-pack .screenplay {
+  margin-bottom: 2rem;
+}
+
+.scene-pack .blocking-layout {
+  margin: 2rem 0;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+}
+
+.scene-pack pre.floor-plan {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: #f0ebe3;
+  border-radius: 4px;
+}
+
+.scene-pack table.blocking-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.scene-pack table.blocking-table th,
+.scene-pack table.blocking-table td {
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+}
+
+.scene-pack .moments {
+  margin-top: 2rem;
+}
+
+.scene-pack article.moment-card {
+  margin: 1.5rem 0;
+  padding: 1rem 1.15rem;
+  background: var(--card);
+  border: 2px solid var(--border-strong);
+  border-radius: 8px;
+}
+
+.scene-pack .moment-card-header h3 {
+  margin: 0 0 0.35rem;
+}
+
+.scene-pack .script-anchor {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.scene-pack .moment-grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (min-width: 40rem) {
+  .scene-pack .moment-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.scene-pack .storyboard-panel {
+  margin: 0;
+  padding: 0.75rem;
+  background: #f0ebe3;
+  border-radius: 4px;
+}
+
+.scene-pack .storyboard-panel figcaption {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.scene-pack .storyboard-sketch {
+  margin: 0.5rem 0 0;
+  font-size: 0.92rem;
+}
+
+.scene-pack dl.shot-specs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.75rem;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.scene-pack dl.shot-specs dt {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.scene-pack .moment-blocking h4,
+.scene-pack .moment-audio h4 {
+  font-size: 0.95rem;
+  margin: 0.75rem 0 0.35rem;
+  border-bottom: none;
+}
+
+.scene-pack .moment-blocking ul,
+.scene-pack .moment-audio ul {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
 }

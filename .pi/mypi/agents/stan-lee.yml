@@ -10,31 +10,35 @@ prompt:
     Prerequisites: The user provides Markdown chapter files in story/original/. You do not ingest or split raw manuscripts.
 
     Early steps (read the matching SKILL.md before working):
-    1 — Convert Markdown originals to HTML → .pi/skills/1-0-convert-to-html/SKILL.md
-    1.1 — Project entity manifest (one chapter per run) → .pi/skills/1-1-entity-manifest/SKILL.md
-    1.2 — Entity prompt pages (one entity×chapter slice per run) → .pi/skills/1-2-entity-prompts/SKILL.md
-    2 — Adapt screenplay HTML → .pi/skills/2-adapt-screenplay/SKILL.md
+    1a — Convert Markdown originals to HTML → .pi/skills/1a-convert-to-html/SKILL.md
+    1b — Project entity manifest (one chapter per run) → .pi/skills/1b-entity-manifest/SKILL.md
+    1c — Entity prompt pages (one entity×chapter slice per run) → .pi/skills/1c-entity-prompts/SKILL.md
+    2a — Scene index (one chapter per run) → .pi/skills/2a-identify-scenes/SKILL.md
+    2b — Scene screenplay (one scene per run) → .pi/skills/2b-scene-screenplay/SKILL.md
+    2c — Scene moment cards (one moment per run) → .pi/skills/2c-scene-moment/SKILL.md
 
-    Later visual phases are intentionally out of scope for this preset until the user asks to design them.
+    Creative model for moments: docs/shot-master-tuple.md.
 
     Bare continue: When the user says only "continue" (or "Continue"), do not ask which step.
-    1. Open story/adapted/entities.html when it exists.
-    2. Read #pipeline-next-1-1, #pipeline-next-1-2, and data-next-* on <main> — then follow AGENTS.md "Bare continue" to pick exactly one skill.
-    3. Read that skill's SKILL.md and perform exactly one unit (one chapter scan, one entity×chapter slice, or one screenplay).
-    4. For Steps 1.1 and 1.2, read only the single chapter HTML named in pipeline-next — never multiple chapters in one run.
+    1. Open story/adapted/entities.html when it exists; when Step 1c is complete, also open story/adapted/scenes.html.
+    2. Read pipeline-next lines and data-next-* — follow AGENTS.md "Bare continue" to pick exactly one skill.
+    3. Read that skill's SKILL.md and perform exactly one unit.
+    4. For Steps 1b, 1c, and 2a, read only the single chapter HTML named in pipeline-next. For 2b/2c, read only the named scene's source span and pack.
 
     Operating rules:
     - Cross-cutting structure (paths, links, naming, bare continue routing): AGENTS.md in project context.
-    - You must call write or edit on every artifact you change, then re-read the file to verify before saying done. Never claim entities.html or a prompt page was updated without a successful write.
+    - You must call write or edit on every artifact you change, then re-read the file to verify before saying done.
     - One unit per run; then stop. Suggest "continue" for the next unit — do not perform it in the same run.
     - Prefer file artifacts over long chat dumps; point to paths when finished.
     - End with: what changed, open questions, suggested next step.
 
 skillDirs:
-  - ../skills/1-0-convert-to-html
-  - ../skills/1-1-entity-manifest
-  - ../skills/1-2-entity-prompts
-  - ../skills/2-adapt-screenplay
+  - ../skills/1a-convert-to-html
+  - ../skills/1b-entity-manifest
+  - ../skills/1c-entity-prompts
+  - ../skills/2a-identify-scenes
+  - ../skills/2b-scene-screenplay
+  - ../skills/2c-scene-moment
 
 tools: include
 includeTools:

@@ -14,15 +14,19 @@ REPO_ROOT = Path(__file__).resolve().parent
 INDEX_PATH = REPO_ROOT / "index.html"
 
 MANIFEST = REPO_ROOT / "story" / "adapted" / "entities.html"
+SCENE_MANIFEST = REPO_ROOT / "story" / "adapted" / "scenes.html"
+SCENES_DIR = REPO_ROOT / "story" / "scenes"
 
 PIPELINE_STEPS = """\
   <section class="index-section index-pipeline" id="steps">
     <h2>Pipeline steps</h2>
     <ol>
-      <li><strong>Step 1</strong> — Convert to HTML → <code>story/html/&lt;chapter&gt;.html</code></li>
-      <li><strong>Step 1.1</strong> — Entity manifest → <code>story/adapted/entities.html</code></li>
-      <li><strong>Step 1.2</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code></li>
-      <li><strong>Step 2</strong> — Screenplay → <code>story/adapted/&lt;chapter&gt;-screenplay.html</code></li>
+      <li><strong>Step 1a</strong> — Convert to HTML → <code>story/html/&lt;chapter&gt;.html</code></li>
+      <li><strong>Step 1b</strong> — Entity manifest → <code>story/adapted/entities.html</code></li>
+      <li><strong>Step 1c</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code></li>
+      <li><strong>Step 2a</strong> — Scene index → <code>story/adapted/scenes.html</code></li>
+      <li><strong>Step 2b</strong> — Scene screenplay → <code>story/scenes/&lt;scene-slug&gt;.html</code></li>
+      <li><strong>Step 2c</strong> — Moment cards → same scene pack</li>
     </ol>
   </section>
 """
@@ -64,9 +68,6 @@ def chapter_slugs() -> list[str]:
         slugs.update(p.stem for p in html_dir.glob("*.html"))
     if original_dir.is_dir():
         slugs.update(p.stem for p in original_dir.glob("*.md"))
-    if adapted_dir.is_dir():
-        for path in adapted_dir.glob("*-screenplay.html"):
-            slugs.add(path.name[: -len("-screenplay.html")])
     return sorted(slugs, key=chapter_sort_key)
 
 
@@ -87,7 +88,7 @@ def manifest_entities() -> list[tuple[str, str]]:
 
 def render_chapter_cards(slugs: list[str]) -> str:
     if not slugs:
-        return '<p class="muted">No chapters yet. Add Markdown under <code>story/original/</code> and run Step 1.</p>'
+        return '<p class="muted">No chapters yet. Add Markdown under <code>story/original/</code> and run Step 1a.</p>'
 
     cards: list[str] = []
     html_dir = REPO_ROOT / "story" / "html"
@@ -95,15 +96,12 @@ def render_chapter_cards(slugs: list[str]) -> str:
 
     for slug in slugs:
         source = html_dir / f"{slug}.html"
-        screenplay = adapted_dir / f"{slug}-screenplay.html"
         title = page_title(source) if source.is_file() else None
         heading = html.escape(title) if title else html.escape(slug)
 
         links: list[str] = []
         if source.is_file():
             links.append(f"<li>{link(source, 'Source HTML')}</li>")
-        if screenplay.is_file():
-            links.append(f"<li>{link(screenplay, 'Screenplay')}</li>")
         if not links:
             links.append('<li><span class="muted">No HTML for this chapter yet</span></li>')
 
@@ -143,6 +141,30 @@ def render_entity_cards(entities: list[tuple[str, str]]) -> str:
     return f'<div class="nav-grid">{"".join(cards)}</div>'
 
 
+def scene_pack_paths() -> list[Path]:
+    if not SCENES_DIR.is_dir():
+        return []
+    return sorted(SCENES_DIR.glob("*.html"), key=lambda p: p.stem)
+
+
+def render_scene_pack_cards() -> str:
+    packs = scene_pack_paths()
+    if not packs:
+        return '<p class="muted">No scene packs yet. Complete Steps 2a–2c.</p>'
+
+    cards: list[str] = []
+    for path in packs:
+        title = page_title(path) or path.stem
+        cards.append(
+            f'<article class="nav-card">'
+            f"<h3>{html.escape(title)}</h3>"
+            f'<p class="slug"><code>{html.escape(path.stem)}</code></p>'
+            f'<ul class="nav-list"><li>{link(path, "Scene pack")}</li></ul>'
+            "</article>"
+        )
+    return f'<div class="nav-grid">{"".join(cards)}</div>'
+
+
 def generate_index() -> str:
     slugs = chapter_slugs()
     entities = manifest_entities()
@@ -153,8 +175,20 @@ def generate_index() -> str:
         title = page_title(MANIFEST) or "Entity manifest"
         manifest_block = (
             '<section class="index-section" id="manifest">'
-            "<h2>Entity manifest</h2>"
-            f'<ul class="nav-list"><li>{link(MANIFEST, title)}</li></ul>'
+            "<h2>Manifests</h2>"
+            f'<ul class="nav-list"><li>{link(MANIFEST, title)}</li>'
+        )
+        if SCENE_MANIFEST.is_file():
+            stitle = page_title(SCENE_MANIFEST) or "Scene manifest"
+            manifest_block += f"<li>{link(SCENE_MANIFEST, stitle)}</li>"
+        manifest_block += "</ul></section>"
+
+    scenes_section = ""
+    if scene_pack_paths() or SCENE_MANIFEST.is_file():
+        scenes_section = (
+            '<section class="index-section" id="scenes">'
+            "<h2>Scene packs</h2>"
+            f"{render_scene_pack_cards()}"
             "</section>"
         )
 
@@ -189,6 +223,8 @@ def generate_index() -> str:
   </section>
 
   {manifest_block}
+
+  {scenes_section}
 
   {entities_section}
 

@@ -1,19 +1,19 @@
 ---
-name: 1-1-entity-manifest
-description: Merge one chapter into the project entity manifest. Step 1.1; bare continue uses this when a chapter is not yet in data-chapters-scanned.
+name: 1b-entity-manifest
+description: Merge one chapter into the project entity manifest. Step 1b; bare continue uses this when a chapter is not yet in data-chapters-scanned.
 ---
 
-# Step 1.1 — Entity manifest (project-wide)
+# Step 1b — Entity manifest (project-wide)
 
 ## Bare continue
 
 When the user says **`continue`** and AGENTS.md routes here:
 
-1. Open `story/adapted/entities.html` and read `#pipeline-next-1-1` / `data-next-chapter` (or derive the first HTML chapter missing from `data-chapters-scanned`).
+1. Open `story/adapted/entities.html` and read `#pipeline-next-1b` / `data-next-chapter` (or derive the first HTML chapter missing from `data-chapters-scanned`).
 2. Read **only** `story/html/<that-chapter>.html`.
 3. Merge into `entities.html`, update pipeline-next, then **stop**.
 
-Do not start Step 1.2 in the same run.
+Do not start Step 1c in the same run.
 
 ## Persist artifacts (mandatory)
 
@@ -23,7 +23,7 @@ Do not start Step 1.2 in the same run.
 
 ## Goal
 
-Maintain one project manifest by scanning **one chapter per run** and merging entities into it. Record display names, slugs, and **appearances** (every chapter where the entity is named or referred to in prose). Do not create prompt pages or prompt links in Name cells—that is Step 1.2.
+Maintain one project manifest by scanning **one chapter per run** and merging entities into it. Record display names, slugs, and **appearances** (every chapter where the entity is named or referred to in prose). Do not create prompt pages or prompt links in Name cells—that is Step 1c.
 
 ## Inputs
 
@@ -43,42 +43,42 @@ Maintain one project manifest by scanning **one chapter per run** and merging en
 At the top of `entities.html`, keep two lines humans and agents read first:
 
 ```html
-<p class="pipeline-next" id="pipeline-next-1-1" data-step="1.1">Step 1.1 next: scan <strong>1-opportunity</strong> — read <code>story/html/1-opportunity.html</code></p>
-<p class="pipeline-next" id="pipeline-next-1-2" data-step="1.2">Step 1.2 next: <strong>james</strong> — <strong>0-prologue</strong> — read <code>story/html/0-prologue.html</code></p>
+<p class="pipeline-next" id="pipeline-next-1b" data-step="1b">Step 1b next: scan <strong>1-opportunity</strong> — read <code>story/html/1-opportunity.html</code></p>
+<p class="pipeline-next" id="pipeline-next-1c" data-step="1c">Step 1c next: <strong>james</strong> — <strong>0-prologue</strong> — read <code>story/html/0-prologue.html</code></p>
 ```
 
 Also set on `<main class="entity-manifest">`:
 
-- `data-next-step="1.1"` or `1.2` for the step you are advancing
-- `data-next-chapter="<slug>"` — for 1.1, the chapter to scan; for 1.2, leave as set by the last 1.2 run or the skill’s walk order
-- `data-next-entity="<slug>"` — only for 1.2 (omit or empty during 1.1-only runs)
+- `data-next-step="1b"` or `1c` for the step you are advancing
+- `data-next-chapter="<slug>"` — for 1b, the chapter to scan; for 1c, leave as set by the last 1c run or the skill’s walk order
+- `data-next-entity="<slug>"` — only for 1c (omit or empty during 1b-only runs)
 
-When Step 1.1 is **complete** for the project, set `#pipeline-next-1-1` to `Step 1.1: complete` and clear `data-next-step` / `data-next-chapter` for 1.1 (or leave `data-next-step="1.2"` if 1.2 is active).
+When Step 1b is **complete** for the project, set `#pipeline-next-1b` to `Step 1b: complete` and clear `data-next-step` / `data-next-chapter` for 1b (or leave `data-next-step="1c"` if 1c is active).
 
-After each 1.1 run, refresh `#pipeline-next-1-2` to the current first pending 1.2 slice (same walk order as Step 1.2) so the manifest always shows what to do next.
+After each 1b run, refresh `#pipeline-next-1c` to the current first pending 1c slice (same walk order as Step 1c) so the manifest always shows what to do next.
 
-## Continue workflow (Step 1.1)
+## Continue workflow (Step 1b)
 
 1. List chapter slugs that have `story/html/<chapter>.html`, in sorted order.
 2. Read `data-chapters-scanned` on `<main class="entity-manifest">` (comma-separated slugs; empty if missing).
-3. **Next chapter** = first HTML chapter **not** in `data-chapters-scanned` (should match `#pipeline-next-1-1`).
+3. **Next chapter** = first HTML chapter **not** in `data-chapters-scanned` (should match `#pipeline-next-1b`).
 4. If the user names a chapter explicitly, scan that chapter instead (still merge into the project manifest).
 5. Extract entities from that chapter only; **merge** into `entities.html` (see merge rules). For **existing rows**, append an Appearances `<li>` for this chapter when the entity is mentioned—do not create duplicate scene/character rows.
 6. Append the chapter slug to `data-chapters-scanned`.
 7. Update pipeline-next lines and `data-next-*` on `<main>` (`write`/`edit`, then verify).
 8. Process **one chapter**, then stop. Tell the user to say **continue** for the next unit.
 
-**Step 1.1 complete** when every `story/html/*.html` chapter is listed in `data-chapters-scanned`.
+**Step 1b complete** when every `story/html/*.html` chapter is listed in `data-chapters-scanned`.
 
-## Manifest link contract (shared with Step 1.2)
+## Manifest link contract (shared with Step 1c)
 
-| Element | Step 1.1 | Step 1.2 |
+| Element | Step 1b | Step 1c |
 |---------|----------|----------|
 | **Name** | Plain text only | Link to `../../prompts/<slug>/<slug>-base.html` when that file is **first created** |
-| **Appearances** (`ul.chapter-refs`) | Source links per chapter mention | Mark slice done (see Step 1.2) |
+| **Appearances** (`ul.chapter-refs`) | Source links per chapter mention | Mark slice done (see Step 1c) |
 | Row `id` | `entity-<slug>` | Unchanged |
 
-**Appearances column (Step 1.1)** — one `<li>` per chapter where this entity is **named or referred to** (including dialogue about them, narration, or projected/remote scenes):
+**Appearances column (Step 1b)** — one `<li>` per chapter where this entity is **named or referred to** (including dialogue about them, narration, or projected/remote scenes):
 
 ```html
 <li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
@@ -86,7 +86,7 @@ After each 1.1 run, refresh `#pipeline-next-1-2` to the current first pending 1.
 
 When the same entity is mentioned again in a later chapter scan, **append** a new `<li data-chapter="…">` to the existing `<ul class="chapter-refs">` (do not duplicate rows). Put `class="chapter-refs"` on the `<ul>`, not on the `<td>`. Only `<main data-chapters-scanned>` uses comma-separated chapter slugs; never put comma-separated slugs on `<ul>` or `<li>`.
 
-**Wrong in Step 1.1:**
+**Wrong in Step 1b:**
 
 ```html
 <td><a href="../../prompts/james/james-base.html">James</a></td>
@@ -122,7 +122,7 @@ On merge, preserve `<head>` and the stylesheet `<link>`; do not remove or inline
 - **Fixtures** — set dressing inside a scene row for that scene only.
 - **Props** — portable or reusable objects, not single-scene set dressing.
 - **Characters** — name and variant notes only; no appearance, behavior, or plot in the manifest.
-- **Appearances** — if the entity’s name or a clear reference appears anywhere in the chapter (including reported dialogue, flashbacks, projections, or “player on screen” feeds), add this chapter to **Appearances**. Step 1.2 will gather depiction detail from those paragraphs.
+- **Appearances** — if the entity’s name or a clear reference appears anywhere in the chapter (including reported dialogue, flashbacks, projections, or “player on screen” feeds), add this chapter to **Appearances**. Step 1c will gather depiction detail from those paragraphs.
 
 ## Layout rules
 
@@ -145,10 +145,10 @@ Use this skeleton when creating the file for the first time; preserve structure 
   <link rel="stylesheet" href="../../assets/screenplay.css">
 </head>
 <body>
-  <main class="entity-manifest" data-chapters-scanned="" data-next-step="1.1" data-next-chapter="0-prologue">
+  <main class="entity-manifest" data-chapters-scanned="" data-next-step="1b" data-next-chapter="0-prologue">
     <h1>Entity Manifest</h1>
-    <p class="pipeline-next" id="pipeline-next-1-1" data-step="1.1">Step 1.1 next: scan <strong>0-prologue</strong> — read <code>story/html/0-prologue.html</code></p>
-    <p class="pipeline-next" id="pipeline-next-1-2" data-step="1.2">Step 1.2: waiting for manifest appearances</p>
+    <p class="pipeline-next" id="pipeline-next-1b" data-step="1b">Step 1b next: scan <strong>0-prologue</strong> — read <code>story/html/0-prologue.html</code></p>
+    <p class="pipeline-next" id="pipeline-next-1c" data-step="1c">Step 1c: waiting for manifest appearances</p>
     <section id="created">
       <h2>Created entities</h2>
       <section id="characters" class="entity-type" data-type="character">
@@ -186,7 +186,7 @@ Validate: no `../../prompts/` in any **Name** cell; every mention in the chapter
 
 ## Done when (single run)
 
-`entities.html` was written on disk; this chapter’s slug is in `data-chapters-scanned`; every entity **mentioned** in the chapter has correct **Appearances** entries (including appended `<li>` on existing rows); pipeline-next lines reflect the next unit (1.1 chapter or first 1.2 slice).
+`entities.html` was written on disk; this chapter’s slug is in `data-chapters-scanned`; every entity **mentioned** in the chapter has correct **Appearances** entries (including appended `<li>` on existing rows); pipeline-next lines reflect the next unit (1b chapter or first 1c slice).
 
 ## Done when (project)
 

@@ -1,19 +1,19 @@
 ---
-name: 1-2-entity-prompts
-description: Build entity prompt pages from the manifest. Step 1.2; bare continue uses this after Step 1.1 is complete, one entity×chapter slice per run.
+name: 1c-entity-prompts
+description: Build entity prompt pages from the manifest. Step 1c; bare continue uses this after Step 1b is complete, one entity×chapter slice per run.
 ---
 
-# Step 1.2 — Entity prompt pages (project-wide)
+# Step 1c — Entity prompt pages (project-wide)
 
 ## Bare continue
 
-When the user says **`continue`** and AGENTS.md routes here (Step 1.1 complete, pending appearance slices):
+When the user says **`continue`** and AGENTS.md routes here (Step 1b complete, pending appearance slices):
 
-1. Open `story/adapted/entities.html` and read `#pipeline-next-1-2` / `data-next-entity` / `data-next-chapter`.
+1. Open `story/adapted/entities.html` and read `#pipeline-next-1c` / `data-next-entity` / `data-next-chapter`.
 2. Read **only** `story/html/<that-chapter>.html`.
 3. Update `prompts/<slug>/<slug>-base.html` and the manifest slice for that entity×chapter, then **stop**.
 
-Do not scan an unscanned manifest chapter (that is Step 1.1).
+Do not scan an unscanned manifest chapter (that is Step 1b).
 
 ## Persist artifacts (mandatory)
 
@@ -29,7 +29,7 @@ One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one 
 
 - `story/adapted/entities.html` (read pipeline-next and/or walk appearances to choose the slice)
 - `story/html/<chapter>.html` for the slice’s chapter — **only this chapter** in context for extraction
-- Optional: `story/adapted/<chapter>-screenplay.html`
+- Optional (after Step 2b): `story/scenes/<scene-slug>.html` screenplays for that chapter
 
 ## Output
 
@@ -38,7 +38,7 @@ One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one 
 
 **Retired:** do not read or write `story/adapted/<chapter>-entities.html`.
 
-## Manifest link contract (shared with Step 1.1)
+## Manifest link contract (shared with Step 1b)
 
 | Signal | Meaning |
 |--------|---------|
@@ -47,13 +47,13 @@ One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one 
 | `<li data-chapter="…">` without `data-slice-done` | Slice pending |
 | `<li data-chapter="…" data-slice-done="true">` | Slice complete |
 
-**Pending appearance (Step 1.1):**
+**Pending appearance (Step 1b):**
 
 ```html
 <li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
 ```
 
-**Slice done (Step 1.2)** — primary link points at the evidence section on the prompt page; keep source paragraph in parentheses:
+**Slice done (Step 1c)** — primary link points at the evidence section on the prompt page; keep source paragraph in parentheses:
 
 ```html
 <li data-chapter="0-prologue" data-slice-done="true">
@@ -66,27 +66,27 @@ One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one 
 
 Before stopping, update on `entities.html`:
 
-- `#pipeline-next-1-2` — e.g. `Step 1.2 next: <strong>honeycrisp</strong> — <strong>0-prologue</strong> — read <code>story/html/0-prologue.html</code>`
-- `<main>` attributes: `data-next-step="1.2"`, `data-next-entity="<slug>"`, `data-next-chapter="<chapter>"` for the **following** pending slice (after the one you just finished)
+- `#pipeline-next-1c` — e.g. `Step 1c next: <strong>honeycrisp</strong> — <strong>0-prologue</strong> — read <code>story/html/0-prologue.html</code>`
+- `<main>` attributes: `data-next-step="1c"`, `data-next-entity="<slug>"`, `data-next-chapter="<chapter>"` for the **following** pending slice (after the one you just finished)
 
-When no pending slices remain: `#pipeline-next-1-2` → `Step 1.2: complete`; clear `data-next-entity` and `data-next-chapter`.
+When no pending slices remain: `#pipeline-next-1c` → `Step 1c: complete`; clear `data-next-entity` and `data-next-chapter`.
 
-Agents may read `#pipeline-next-1-2` and `data-next-*` first instead of re-walking the whole manifest.
+Agents may read `#pipeline-next-1c` and `data-next-*` first instead of re-walking the whole manifest.
 
-## Continue workflow (Step 1.2)
+## Continue workflow (Step 1c)
 
-1. Open `story/adapted/entities.html` and read `#pipeline-next-1-2` / `data-next-entity` / `data-next-chapter`, **or** walk tables as below.
+1. Open `story/adapted/entities.html` and read `#pipeline-next-1c` / `data-next-entity` / `data-next-chapter`, **or** walk tables as below.
 2. Walk **Created entities** tables in order: **Characters** → **Scenes** → **Props** → **Styles**.
 3. For each row, walk `<ul class="chapter-refs">` items in chapter slug order (`data-chapter`).
 4. **Next slice** = first `<li>` **without** `data-slice-done="true"`.
 5. Read slug from `id="entity-<slug>"`; read chapter from `data-chapter` on that `<li>`.
 6. Process **one** slice, then stop. Tell the user to say **continue** for the next slice.
 
-Optional: user may restrict to one entity (`continue 1.2 for james`) — only consider `<li>` elements on that row.
+Optional: user may restrict to one entity (`continue 1c for james`) — only consider `<li>` elements on that row.
 
-**Step 1.2 complete** when every appearance `<li>` has `data-slice-done="true"`, each prompt page’s `section.appearances` matches, and each slice has a non-empty `#evidence-<chapter>` section.
+**Step 1c complete** when every appearance `<li>` has `data-slice-done="true"`, each prompt page’s `section.appearances` matches, and each slice has a non-empty `#evidence-<chapter>` section.
 
-If **continue** finds no pending slices, report Step 1.2 complete for the project.
+If **continue** finds no pending slices, report Step 1c complete for the project.
 
 ## Per-slice workflow
 
@@ -101,7 +101,7 @@ If **continue** finds no pending slices, report Step 1.2 complete for the projec
 9. Set the manifest appearance `<li>` to `data-slice-done="true"` with links as in the contract above.
 10. Update pipeline-next on the manifest for the **next** pending slice.
 
-**Mandatory:** never end a 1.2 run without steps 7, 9, and 10. If evidence already existed from a prior partial run, this run still marks the slice done and syncs appearances.
+**Mandatory:** never end a 1c run without steps 7, 9, and 10. If evidence already existed from a prior partial run, this run still marks the slice done and syncs appearances.
 
 Do not batch multiple slices unless the user explicitly asks.
 
@@ -208,12 +208,12 @@ From `prompts/<slug>/<slug>-base.html`:
 
 ## Per-run checklist
 
-1. Resolve next pending slice (`#pipeline-next-1-2` or manifest walk).
+1. Resolve next pending slice (`#pipeline-next-1c` or manifest walk).
 2. Read only that chapter’s source HTML; write or update evidence and description.
 3. Sync `section.appearances` on the prompt page.
 4. Link **Name** in the manifest if the file was just created.
 5. Mark manifest `<li>` with `data-slice-done="true"` (`write`/`edit`, then verify).
-6. Update `#pipeline-next-1-2` and `data-next-*` for the **following** slice.
+6. Update `#pipeline-next-1c` and `data-next-*` for the **following** slice.
 7. Stop; suggest **continue** for the next unit.
 
 ## Done when (project)

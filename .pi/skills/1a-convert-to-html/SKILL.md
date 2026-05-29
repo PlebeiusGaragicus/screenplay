@@ -1,9 +1,9 @@
 ---
-name: 1-0-convert-to-html
-description: Convert one Markdown chapter to source HTML. Step 1; bare continue uses this only when a chapter lacks story/html output.
+name: 1a-convert-to-html
+description: Convert one Markdown chapter to source HTML. Step 1a; bare continue uses this only when a chapter lacks story/html output.
 ---
 
-# Step 1 — Convert originals
+# Step 1a — Convert originals
 
 ## Bare continue
 
@@ -29,19 +29,19 @@ Convert `story/original/<chapter>.md` into `story/html/<chapter>.html` without s
 From the repository root:
 
 ```bash
-.pi/skills/1-0-convert-to-html/scripts/md-to-html story/original/0-prologue.md
+.pi/skills/1a-convert-to-html/scripts/md-to-html story/original/0-prologue.md
 ```
 
 The script may also be run for every Markdown file in `story/original/`:
 
 ```bash
-.pi/skills/1-0-convert-to-html/scripts/md-to-html
+.pi/skills/1a-convert-to-html/scripts/md-to-html
 ```
 
 ## After converting
 
 - **Do not** read, summarize, or review the generated HTML in the same run. Conversion is complete once the script exits successfully.
-- The user opens and checks `story/html/<chapter>.html` in a browser (or via `./read`) before starting Step 1.1.
+- The user opens and checks `story/html/<chapter>.html` in a browser (or via `./read`) before starting Step 1b.
 
 ## HTML contract
 
@@ -58,7 +58,7 @@ Generated source HTML should be simple and deterministic:
 - Heading IDs are kebab-case slugs from heading text.
 - The generated file includes a comment noting the source Markdown path.
 - `<head>` must include `<link rel="stylesheet" href="../../assets/screenplay.css">` (the conversion script adds this automatically).
-- Do not add entity links in Step 1; entity links are introduced after the manifest exists.
+- Do not add entity links in Step 1a; entity links are introduced after the manifest exists.
 
 ## Done when
 
