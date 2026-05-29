@@ -9,7 +9,7 @@ description: Convert one Markdown chapter to source HTML. Step 1a; bare continue
 
 When the user says **`continue`** and a `story/original/<chapter>.md` exists without matching `story/html/<chapter>.html`:
 
-1. Run the conversion script for **one** chapter (first missing in slug order unless the user named a chapter).
+1. Run the conversion script for missing chapters (first missing in slug order unless the user named a chapter).
 2. **Stop**—do not read or summarize the HTML in the same run (see After converting).
 
 ## Goal

@@ -40,20 +40,22 @@ One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one 
 
 ## Manifest link contract (shared with Step 1b)
 
+Step 1b leaves **one `<li>` per chapter** on each entity row (chapter slug as link text). Step 1c is where **paragraph-level** provenance appears—in evidence blockquotes and, after a slice is done, optionally in parentheses on the manifest line.
+
 | Signal | Meaning |
 |--------|---------|
 | Plain **Name** | No `prompts/<slug>/<slug>-base.html` yet |
 | Linked **Name** | Prompt file exists (entity “opened”) — link as soon as the file is created, not when all slices are done |
-| `<li data-chapter="…">` without `data-slice-done` | Slice pending |
-| `<li data-chapter="…" data-slice-done="true">` | Slice complete |
+| `<li data-chapter="…">` without `data-slice-done` | One pending **(entity × chapter)** slice |
+| `<li data-chapter="…" data-slice-done="true">` | That chapter slice complete |
 
-**Pending appearance (Step 1b):**
+**Pending appearance (as left by Step 1b)** — chapter only; do not add extra `<li>` elements for more paragraphs:
 
 ```html
-<li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
+<li data-chapter="0-prologue"><a href="../html/0-prologue.html">0-prologue</a></li>
 ```
 
-**Slice done (Step 1c)** — primary link points at the evidence section on the prompt page; keep source paragraph in parentheses:
+**Slice done (Step 1c)** — update the **same** `<li>` (do not split one chapter into multiple list items). Primary link → evidence section; optional representative source anchor in parentheses:
 
 ```html
 <li data-chapter="0-prologue" data-slice-done="true">
@@ -61,6 +63,8 @@ One HTML prompt page per entity (`prompts/<slug>/<slug>-base.html`), with **one 
   (<a href="../html/0-prologue.html#p-001">p-001</a>)
 </li>
 ```
+
+All other `p-xxx` cites for that chapter belong in `#evidence-0-prologue` on the prompt page, not as additional manifest `<li>` rows.
 
 ## Pipeline next (update every run)
 
@@ -77,8 +81,8 @@ Agents may read `#pipeline-next-1c` and `data-next-*` first instead of re-walkin
 
 1. Open `story/adapted/entities.html` and read `#pipeline-next-1c` / `data-next-entity` / `data-next-chapter`, **or** walk tables as below.
 2. Walk **Created entities** tables in order: **Characters** → **Scenes** → **Props** → **Styles**.
-3. For each row, walk `<ul class="chapter-refs">` items in chapter slug order (`data-chapter`).
-4. **Next slice** = first `<li>` **without** `data-slice-done="true"`.
+3. For each row, walk `<ul class="chapter-refs">` items in chapter slug order (`data-chapter`). Expect **at most one** `<li>` per chapter per row (if Step 1b left duplicates, fix the manifest to a single slice per chapter before continuing).
+4. **Next slice** = first `<li>` **without** `data-slice-done="true"` (one run = one entity × one chapter).
 5. Read slug from `id="entity-<slug>"`; read chapter from `data-chapter` on that `<li>`.
 6. Process **one** slice, then stop. Tell the user to say **continue** for the next slice.
 

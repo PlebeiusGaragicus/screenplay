@@ -23,7 +23,19 @@ Do not start Step 1c in the same run.
 
 ## Goal
 
-Maintain one project manifest by scanning **one chapter per run** and merging entities into it. Record display names, slugs, and **appearances** (every chapter where the entity is named or referred to in prose). Do not create prompt pages or prompt links in Name cells—that is Step 1c.
+Maintain one project manifest by scanning **one chapter per run** and merging entities into it. Record display names, slugs, and **chapter-level appearances** (which chapters mention the entity—not which paragraphs). Do not create prompt pages or prompt links in Name cells—that is Step 1c.
+
+## Appearances = chapter slices (read this first)
+
+The **Appearances** column is an index of **(entity × chapter)** work units for Step 1c—not a paragraph hit list.
+
+| Do in Step 1b | Do **not** in Step 1b |
+|---------------|------------------------|
+| One `<li data-chapter="…">` per entity **per chapter** where they are named or referred | One `<li>` per paragraph, dialogue line, or mention |
+| Link label is the **chapter slug** (e.g. `0-prologue`) | Link labels like `0-prologue p-003`, `0-prologue p-005`, … |
+| At most **one** `<li>` with a given `data-chapter` on each entity row | Multiple `<li>` elements sharing the same `data-chapter` |
+
+If James is named in thirty paragraphs of `0-prologue`, he still gets **one** appearance line for `0-prologue`. Step 1c reads the whole chapter and records paragraph-level evidence on the prompt page (`#evidence-<chapter>` with blockquotes to `p-xxx`). Paragraph spans belong on **scene** rows in Step 2a+, not in entity Appearances.
 
 ## Inputs
 
@@ -63,7 +75,7 @@ After each 1b run, refresh `#pipeline-next-1c` to the current first pending 1c s
 2. Read `data-chapters-scanned` on `<main class="entity-manifest">` (comma-separated slugs; empty if missing).
 3. **Next chapter** = first HTML chapter **not** in `data-chapters-scanned` (should match `#pipeline-next-1b`).
 4. If the user names a chapter explicitly, scan that chapter instead (still merge into the project manifest).
-5. Extract entities from that chapter only; **merge** into `entities.html` (see merge rules). For **existing rows**, append an Appearances `<li>` for this chapter when the entity is mentioned—do not create duplicate scene/character rows.
+5. Extract entities from that chapter only; **merge** into `entities.html` (see merge rules). For **existing rows**, add **one** Appearances `<li>` for this chapter when the entity is mentioned anywhere in the chapter—unless that `data-chapter` is already on the row. Do not create duplicate entity rows.
 6. Append the chapter slug to `data-chapters-scanned`.
 7. Update pipeline-next lines and `data-next-*` on `<main>` (`write`/`edit`, then verify).
 8. Process **one chapter**, then stop. Tell the user to say **continue** for the next unit.
@@ -75,21 +87,36 @@ After each 1b run, refresh `#pipeline-next-1c` to the current first pending 1c s
 | Element | Step 1b | Step 1c |
 |---------|----------|----------|
 | **Name** | Plain text only | Link to `../../prompts/<slug>/<slug>-base.html` when that file is **first created** |
-| **Appearances** (`ul.chapter-refs`) | Source links per chapter mention | Mark slice done (see Step 1c) |
+| **Appearances** (`ul.chapter-refs`) | **One** `<li>` per chapter slice (chapter slug as link text) | Mark that slice done; optional anchor in parentheses (see Step 1c) |
 | Row `id` | `entity-<slug>` | Unchanged |
 
-**Appearances column (Step 1b)** — one `<li>` per chapter where this entity is **named or referred to** (including dialogue about them, narration, or projected/remote scenes):
+**Appearances column (Step 1b)** — exactly **one** `<li>` per chapter where this entity is **named or referred to** anywhere in that chapter (dialogue about them, narration, flashbacks, projections, “on screen” feeds all count as **one** slice for that chapter):
 
 ```html
-<li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
+<li data-chapter="0-prologue"><a href="../html/0-prologue.html">0-prologue</a></li>
 ```
 
-When the same entity is mentioned again in a later chapter scan, **append** a new `<li data-chapter="…">` to the existing `<ul class="chapter-refs">` (do not duplicate rows). Put `class="chapter-refs"` on the `<ul>`, not on the `<td>`. Only `<main data-chapters-scanned>` uses comma-separated chapter slugs; never put comma-separated slugs on `<ul>` or `<li>`.
+You may use `href="../html/0-prologue.html"` (chapter top) or a single optional first-mention anchor (e.g. `#p-001`). The **visible link text must be the chapter slug only**—never `p-001`, `p-003`, or a list of paragraph ids.
+
+When a **later** chapter scan mentions the same entity, **append** one new `<li data-chapter="that-chapter">` (James in prologue + opportunity → two `<li>` elements with **different** `data-chapter` values). Put `class="chapter-refs"` on the `<ul>`, not on the `<td>`. Only `<main data-chapters-scanned>` uses comma-separated chapter slugs; never put comma-separated slugs on `<ul>` or `<li>`.
 
 **Wrong in Step 1b:**
 
 ```html
+<!-- Prompt link in Name — Step 1c only -->
 <td><a href="../../prompts/james/james-base.html">James</a></td>
+```
+
+```html
+<!-- Paragraph inventory — forbidden; breaks 1c routing -->
+<li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-003">0-prologue p-003</a></li>
+<li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-005">0-prologue p-005</a></li>
+```
+
+```html
+<!-- Same chapter repeated on one row — forbidden -->
+<li data-chapter="0-prologue">…</li>
+<li data-chapter="0-prologue">…</li>
 ```
 
 ```html
@@ -122,7 +149,7 @@ On merge, preserve `<head>` and the stylesheet `<link>`; do not remove or inline
 - **Fixtures** — set dressing inside a scene row for that scene only.
 - **Props** — portable or reusable objects, not single-scene set dressing.
 - **Characters** — name and variant notes only; no appearance, behavior, or plot in the manifest.
-- **Appearances** — if the entity’s name or a clear reference appears anywhere in the chapter (including reported dialogue, flashbacks, projections, or “player on screen” feeds), add this chapter to **Appearances**. Step 1c will gather depiction detail from those paragraphs.
+- **Appearances** — if the entity’s name or a clear reference appears **anywhere** in the chapter, ensure **one** `<li data-chapter="<this-chapter>">` exists on that row (create it or skip if already present). Do **not** enumerate paragraphs here. Step 1c reads the full chapter and writes paragraph-level evidence on the prompt page.
 
 ## Layout rules
 
@@ -160,7 +187,7 @@ Use this skeleton when creating the file for the first time; preserve structure 
               <td>James</td>
               <td>
                 <ul class="chapter-refs">
-                  <li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
+                  <li data-chapter="0-prologue"><a href="../html/0-prologue.html">0-prologue</a></li>
                 </ul>
               </td>
               <td><ul class="notes"><li>Human and pony avatar are variants of one identity.</li></ul></td>
@@ -182,11 +209,17 @@ Use this skeleton when creating the file for the first time; preserve structure 
 
 Re-scan **this chapter’s** source HTML. Every candidate should land in a row, a fixture list, **deferred**, or **skipped**. Keep cells lightweight.
 
-Validate: no `../../prompts/` in any **Name** cell; every mention in the chapter has an **Appearances** `<li>` with `data-chapter` matching the scanned slug (no duplicate `data-chapter` on the same row).
+**Validate before you stop:**
+
+- No `../../prompts/` in any **Name** cell.
+- Every entity **mentioned** in this chapter has **exactly one** `<li data-chapter="<scanned-slug>">` on its row (add if missing; do not add a second if one already exists).
+- **No** second `<li>` with the same `data-chapter` on the same row.
+- **No** paragraph ids in Appearances link text (`p-001`, `0-prologue p-003`, etc.).
+- Appearances lists stay short: one line per chapter per entity, not one line per paragraph.
 
 ## Done when (single run)
 
-`entities.html` was written on disk; this chapter’s slug is in `data-chapters-scanned`; every entity **mentioned** in the chapter has correct **Appearances** entries (including appended `<li>` on existing rows); pipeline-next lines reflect the next unit (1b chapter or first 1c slice).
+`entities.html` was written on disk; this chapter’s slug is in `data-chapters-scanned`; every entity **mentioned** in the chapter has **one** chapter-level `<li>` for this scan (not zero, not many); pipeline-next lines reflect the next unit (1b chapter or first 1c slice).
 
 ## Done when (project)
 

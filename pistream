@@ -1,0 +1,28 @@
+# Pi Streaming Functions
+
+# Option 1: Simple text-only stream
+pistream1() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: pistream1 <flags> <prompt>"
+    return 1
+  fi
+
+  pi --mode json "$@" 2>/dev/null | jq -j '
+    select(.type == "message_update" and .assistantMessageEvent.type == "text_delta") 
+    | .assistantMessageEvent.delta
+  '
+}
+
+# Option 2: Full stream with tool execution indicators
+pistream2() {
+  if [ $# -eq 0 ]; then
+    echo "Usage: pistream2 <flags> <prompt>"
+    return 1
+  fi
+
+  pi --mode json "$@" 2>/dev/null | jq -j '
+    (select(.type == "message_update" and .assistantMessageEvent.type == "text_delta") | .assistantMessageEvent.delta),
+    (select(.type == "tool_execution_start") | "\n🛠️ Tool: [\(.toolName)] "),
+    (select(.type == "tool_execution_end") | "\(.isError | if . then "❌ ERROR" else "✅ SUCCESS" end): [\(.toolName)]")
+  '
+}
