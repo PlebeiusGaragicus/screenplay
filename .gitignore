@@ -2,5 +2,5 @@ __pycache__/
 .DS_Store
 .env
 *.html
-story/original/
+story/original/*
 !story/original/.gitkeep

@@ -98,7 +98,6 @@ Use this skeleton when creating the file for the first time; preserve styles and
 <body>
   <main class="entity-manifest" data-chapters-scanned="">
     <h1>Entity Manifest</h1>
-    <p class="meta">Project-wide catalog. Step 1.1 merges one chapter per run.</p>
     <section id="created">
       <h2>Created entities</h2>
       <section id="characters" class="entity-type" data-type="character">
