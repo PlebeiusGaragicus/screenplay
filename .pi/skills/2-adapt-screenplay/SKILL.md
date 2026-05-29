@@ -1,9 +1,9 @@
 ---
 name: 2-adapt-screenplay
-description: Adapt source HTML into semantic Fountain-style screenplay HTML. Use when the user requests Step 1.2 or screenplay adaptation for a chapter.
+description: Adapt source HTML into semantic Fountain-style screenplay HTML. Use when the user requests Step 2 or screenplay adaptation for a chapter.
 ---
 
-# Step 1.2 — Adapt screenplay
+# Step 2 — Adapt screenplay
 
 ## Goal
 
@@ -24,9 +24,9 @@ Adapt a source chapter into navigable, semantic screenplay HTML linked to the en
 - Scene headings use all caps in `<h2 class="scene-heading">`.
 - Preserve the source's intent and key wording while adapting prose into action and dialogue.
 - Link visible entity mentions to their expected prompt pages, using the slug from the manifest.
-- If prompt pages do not exist yet, still link to the expected Step 1.3 path.
+- Prompt pages are created in Step 1.2; link visible entity mentions to those pages when available.
 - Link back to source paragraphs where helpful via `story/html/<chapter>.html#p-xxx`.
-- Do not introduce entities that were not created, merged, or deferred in the manifest.
+- Do not introduce entities that are not represented in the manifest unless the user approves updating Step 1.1/1.2 artifacts first.
 
 ## Screenplay template
 

@@ -10,10 +10,10 @@ prompt:
     Prerequisites: The user provides Markdown chapter files in story/original/. You do not ingest or split raw manuscripts.
 
     Early steps (user picks one + chapter; read the matching SKILL.md before working):
-    0 — Convert Markdown originals to HTML → .pi/skills/0-convert-originals/SKILL.md
-    1.1 — Entity manifest → .pi/skills/1-entity-manifest/SKILL.md
-    1.2 — Adapt screenplay HTML → .pi/skills/2-adapt-screenplay/SKILL.md
-    1.3 — Entity prompt HTML pages → .pi/skills/3-entity-prompts/SKILL.md
+    1 — Convert Markdown originals to HTML → .pi/skills/1-convert-originals/SKILL.md
+    1.1 — Entity manifest → .pi/skills/1.1-entity-manifest/SKILL.md
+    1.2 — Entity prompt HTML pages → .pi/skills/1.2-entity-prompts/SKILL.md
+    2 — Adapt screenplay HTML → .pi/skills/2-adapt-screenplay/SKILL.md
 
     Later visual phases are intentionally out of scope for this preset until the user asks to design them.
 
@@ -25,10 +25,10 @@ prompt:
     - End with: what changed, open questions, suggested next step.
 
 skillDirs:
-  - ../skills/0-convert-originals
-  - ../skills/1-entity-manifest
+  - ../skills/1-convert-originals
+  - ../skills/1.1-entity-manifest
+  - ../skills/1.2-entity-prompts
   - ../skills/2-adapt-screenplay
-  - ../skills/3-entity-prompts
 
 tools: include
 includeTools:

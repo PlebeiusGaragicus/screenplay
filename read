@@ -20,10 +20,10 @@ ADAPTED_DIR = REPO_ROOT / "story" / "adapted"
 PROMPTS_DIR = REPO_ROOT / "prompts"
 
 STEPS = [
-    ("0", "Convert to HTML", "story/html/<chapter>.html"),
+    ("1", "Convert to HTML", "story/html/<chapter>.html"),
     ("1.1", "Entity manifest", "story/adapted/<chapter>-entities.html"),
-    ("1.2", "Screenplay", "story/adapted/<chapter>-screenplay.html"),
-    ("1.3", "Entity prompts", "prompts/<slug>/<slug>-base.html"),
+    ("1.2", "Entity prompts", "prompts/<slug>/<slug>-base.html"),
+    ("2", "Screenplay", "story/adapted/<chapter>-screenplay.html"),
 ]
 
 
@@ -43,29 +43,29 @@ class ChapterStatus:
             slug in self.prompt_paths for slug in self.create_slugs
         )
         return {
-            "0": self.source_html is not None,
+            "1": self.source_html is not None,
             "1.1": self.entities is not None,
-            "1.2": self.screenplay is not None,
-            "1.3": prompts_done if self.create_slugs else False,
+            "1.2": prompts_done if self.create_slugs else False,
+            "2": self.screenplay is not None,
         }
 
     def next_step(self) -> str | None:
         done = self.step_done
-        if not done["0"]:
-            return "0"
+        if not done["1"]:
+            return "1"
         if not done["1.1"]:
             return "1.1"
-        if not done["1.2"]:
+        if self.create_slugs and not done["1.2"]:
             return "1.2"
-        if self.create_slugs and not done["1.3"]:
-            return "1.3"
         if not self.create_slugs and self.entities:
-            return "1.3"
+            return "1.2"
+        if not done["2"]:
+            return "2"
         return None
 
     def progress_label(self) -> str:
         done = self.step_done
-        if done["1.2"] and (not self.create_slugs or done["1.3"]):
+        if done["2"]:
             return "Early pipeline complete"
         nxt = self.next_step()
         if nxt:
@@ -84,8 +84,8 @@ def link(path: Path | None, label: str | None = None) -> str:
     return f'<a href="{rel_href(path)}">{text}</a>'
 
 
-def parse_manifest_create_slugs(manifest_path: Path) -> list[str]:
-    """Collect slugs for rows marked create in entity manifest tables."""
+def parse_manifest_prompt_slugs(manifest_path: Path) -> list[str]:
+    """Collect prompt slugs from linked rows in entity manifest tables."""
     if not manifest_path.exists():
         return []
 
@@ -98,11 +98,13 @@ def parse_manifest_create_slugs(manifest_path: Path) -> list[str]:
         flags=re.IGNORECASE | re.DOTALL,
     ):
         row = match.group(2)
-        if not re.search(r"<td>\s*create\s*</td>", row, flags=re.IGNORECASE):
-            continue
-        slug_match = re.search(r"<code>([^<]+)</code>", row)
-        if slug_match:
-            slugs.append(slug_match.group(1).strip())
+        href_match = re.search(
+            r'href="../../prompts/([^"/]+)/\1-base\.html"',
+            row,
+            flags=re.IGNORECASE,
+        )
+        if href_match:
+            slugs.append(href_match.group(1).strip())
         else:
             slugs.append(match.group(1))
 
@@ -136,7 +138,7 @@ def build_chapter(slug: str) -> ChapterStatus:
         chapter.source_html = source_html
     if entities.exists():
         chapter.entities = entities
-        chapter.create_slugs = parse_manifest_create_slugs(entities)
+        chapter.create_slugs = parse_manifest_prompt_slugs(entities)
     if screenplay.exists():
         chapter.screenplay = screenplay
 
@@ -156,15 +158,15 @@ def status_badge(done: bool, is_next: bool) -> str:
     return '<span class="badge pending">pending</span>'
 
 
-def step_13_artifact(chapter: ChapterStatus) -> str:
+def step_12_artifact(chapter: ChapterStatus) -> str:
     if not chapter.entities:
         return '<span class="muted">Needs manifest (Step 1.1)</span>'
     total = len(chapter.create_slugs)
     if total == 0:
-        return link(chapter.entities, "Manifest (no create rows)")
+        return link(chapter.entities, "Manifest (no prompt rows)")
     created = len(chapter.prompt_paths)
     summary = f"{created}/{total} prompt pages"
-    if chapter.step_done["1.3"]:
+    if chapter.step_done["1.2"]:
         return f"{summary} — {link(chapter.entities, 'manifest')}"
     return (
         f'{summary} — see <a href="{rel_href(chapter.entities)}">manifest</a> for entity list'
@@ -176,15 +178,15 @@ def render_chapter_card(chapter: ChapterStatus) -> str:
     nxt = chapter.next_step()
 
     step_files = {
-        "0": chapter.source_html,
+        "1": chapter.source_html,
         "1.1": chapter.entities,
-        "1.2": chapter.screenplay,
+        "2": chapter.screenplay,
     }
 
     rows = []
     for step_id, step_name, _pattern in STEPS:
-        if step_id == "1.3":
-            artifact = step_13_artifact(chapter)
+        if step_id == "1.2":
+            artifact = step_12_artifact(chapter)
         else:
             artifact = link(step_files[step_id])
         rows.append(
@@ -343,10 +345,10 @@ def generate_index() -> str:
     <h2>Early pipeline</h2>
     <p>Human-led steps. Status below is inferred from files on disk.</p>
     <ol>
-      <li><strong>Step 0</strong> — Markdown originals → <code>story/html/&lt;chapter&gt;.html</code></li>
+      <li><strong>Step 1</strong> — Markdown originals → <code>story/html/&lt;chapter&gt;.html</code></li>
       <li><strong>Step 1.1</strong> — Entity manifest → <code>story/adapted/&lt;chapter&gt;-entities.html</code></li>
-      <li><strong>Step 1.2</strong> — Screenplay → <code>story/adapted/&lt;chapter&gt;-screenplay.html</code></li>
-      <li><strong>Step 1.3</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code></li>
+      <li><strong>Step 1.2</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code></li>
+      <li><strong>Step 2</strong> — Screenplay → <code>story/adapted/&lt;chapter&gt;-screenplay.html</code></li>
     </ol>
   </section>
 
@@ -356,7 +358,7 @@ def generate_index() -> str:
   </section>
 
   {render_file_list("All originals", originals, "No Markdown chapters in story/original/.")}
-  {render_file_list("All source HTML", source_html, "No converted HTML in story/html/. Run Step 0.")}
+  {render_file_list("All source HTML", source_html, "No converted HTML in story/html/. Run Step 1.")}
   {render_file_list("All adapted HTML", adapted, "No adapted artifacts in story/adapted/.")}
   {render_file_list("All entity prompts", prompts, "No entity prompt pages yet.")}
 

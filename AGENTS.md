@@ -30,10 +30,10 @@ The user supplies organized Markdown source chapters before agent work begins:
 
 | Step | Skill | Output |
 |------|-------|--------|
-| 0 | `0-convert-originals` | `story/html/<chapter>.html` |
-| 1.1 | `1-entity-manifest` | `story/adapted/<chapter>-entities.html` |
-| 1.2 | `2-adapt-screenplay` | `story/adapted/<chapter>-screenplay.html` |
-| 1.3 | `3-entity-prompts` | `prompts/<entity>/<entity>-base.html` |
+| 1 | `1-convert-originals` | `story/html/<chapter>.html` |
+| 1.1 | `1.1-entity-manifest` | `story/adapted/<chapter>-entities.html` |
+| 1.2 | `1.2-entity-prompts` | `prompts/<entity>/<entity>-base.html` |
+| 2 | `2-adapt-screenplay` | `story/adapted/<chapter>-screenplay.html` |
 
 Later visual phases are intentionally out of scope for this early pipeline. Step procedures, templates, and “done when” criteria live in each skill, not here.
 
@@ -78,10 +78,10 @@ Detailed templates and examples are in the step skills.
 
 | Artifact | Step skill |
 |----------|-------------|
-| `story/html/<chapter>.html` | `0-convert-originals` |
-| `story/adapted/<chapter>-entities.html` | `1-entity-manifest` |
+| `story/html/<chapter>.html` | `1-convert-originals` |
+| `story/adapted/<chapter>-entities.html` | `1.1-entity-manifest` |
+| `prompts/<entity>/<entity>-base.html` | `1.2-entity-prompts` |
 | `story/adapted/<chapter>-screenplay.html` | `2-adapt-screenplay` |
-| `prompts/<entity>/<entity>-base.html` | `3-entity-prompts` |
 
 ---
 
