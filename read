@@ -1,0 +1,389 @@
+#!/usr/bin/env python3
+"""Generate index.html for the screenplay workspace and open it in a browser."""
+
+from __future__ import annotations
+
+import argparse
+import html
+import re
+import webbrowser
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent
+INDEX_PATH = REPO_ROOT / "index.html"
+
+ORIGINAL_DIR = REPO_ROOT / "story" / "original"
+HTML_DIR = REPO_ROOT / "story" / "html"
+ADAPTED_DIR = REPO_ROOT / "story" / "adapted"
+PROMPTS_DIR = REPO_ROOT / "prompts"
+
+STEPS = [
+    ("0", "Convert to HTML", "story/html/<chapter>.html"),
+    ("1.1", "Entity manifest", "story/adapted/<chapter>-entities.html"),
+    ("1.2", "Screenplay", "story/adapted/<chapter>-screenplay.html"),
+    ("1.3", "Entity prompts", "prompts/<slug>/<slug>-base.html"),
+]
+
+
+@dataclass
+class ChapterStatus:
+    slug: str
+    original: Path | None = None
+    source_html: Path | None = None
+    entities: Path | None = None
+    screenplay: Path | None = None
+    create_slugs: list[str] = field(default_factory=list)
+    prompt_paths: dict[str, Path] = field(default_factory=dict)
+
+    @property
+    def step_done(self) -> dict[str, bool]:
+        prompts_done = bool(self.create_slugs) and all(
+            slug in self.prompt_paths for slug in self.create_slugs
+        )
+        return {
+            "0": self.source_html is not None,
+            "1.1": self.entities is not None,
+            "1.2": self.screenplay is not None,
+            "1.3": prompts_done if self.create_slugs else False,
+        }
+
+    def next_step(self) -> str | None:
+        done = self.step_done
+        if not done["0"]:
+            return "0"
+        if not done["1.1"]:
+            return "1.1"
+        if not done["1.2"]:
+            return "1.2"
+        if self.create_slugs and not done["1.3"]:
+            return "1.3"
+        if not self.create_slugs and self.entities:
+            return "1.3"
+        return None
+
+    def progress_label(self) -> str:
+        done = self.step_done
+        if done["1.2"] and (not self.create_slugs or done["1.3"]):
+            return "Early pipeline complete"
+        nxt = self.next_step()
+        if nxt:
+            return f"Next: Step {nxt}"
+        return "In progress"
+
+
+def rel_href(path: Path) -> str:
+    return html.escape(path.relative_to(REPO_ROOT).as_posix())
+
+
+def link(path: Path | None, label: str | None = None) -> str:
+    if path is None:
+        return '<span class="missing">—</span>'
+    text = html.escape(label or path.name)
+    return f'<a href="{rel_href(path)}">{text}</a>'
+
+
+def parse_manifest_create_slugs(manifest_path: Path) -> list[str]:
+    """Collect slugs for rows marked create in entity manifest tables."""
+    if not manifest_path.exists():
+        return []
+
+    text = manifest_path.read_text(encoding="utf-8")
+    slugs: list[str] = []
+
+    for match in re.finditer(
+        r'<tr id="entity-([^"]+)">(.*?)</tr>',
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    ):
+        row = match.group(2)
+        if not re.search(r"<td>\s*create\s*</td>", row, flags=re.IGNORECASE):
+            continue
+        slug_match = re.search(r"<code>([^<]+)</code>", row)
+        if slug_match:
+            slugs.append(slug_match.group(1).strip())
+        else:
+            slugs.append(match.group(1))
+
+    return slugs
+
+
+def discover_chapters() -> list[str]:
+    slugs: set[str] = set()
+    if ORIGINAL_DIR.exists():
+        slugs.update(p.stem for p in ORIGINAL_DIR.glob("*.md"))
+    if HTML_DIR.exists():
+        slugs.update(p.stem for p in HTML_DIR.glob("*.html"))
+    if ADAPTED_DIR.exists():
+        for path in ADAPTED_DIR.glob("*-entities.html"):
+            slugs.add(path.name[: -len("-entities.html")])
+        for path in ADAPTED_DIR.glob("*-screenplay.html"):
+            slugs.add(path.name[: -len("-screenplay.html")])
+    return sorted(slugs)
+
+
+def build_chapter(slug: str) -> ChapterStatus:
+    chapter = ChapterStatus(slug=slug)
+    original = ORIGINAL_DIR / f"{slug}.md"
+    source_html = HTML_DIR / f"{slug}.html"
+    entities = ADAPTED_DIR / f"{slug}-entities.html"
+    screenplay = ADAPTED_DIR / f"{slug}-screenplay.html"
+
+    if original.exists():
+        chapter.original = original
+    if source_html.exists():
+        chapter.source_html = source_html
+    if entities.exists():
+        chapter.entities = entities
+        chapter.create_slugs = parse_manifest_create_slugs(entities)
+    if screenplay.exists():
+        chapter.screenplay = screenplay
+
+    for slug_name in chapter.create_slugs:
+        prompt_path = PROMPTS_DIR / slug_name / f"{slug_name}-base.html"
+        if prompt_path.exists():
+            chapter.prompt_paths[slug_name] = prompt_path
+
+    return chapter
+
+
+def status_badge(done: bool, is_next: bool) -> str:
+    if done:
+        return '<span class="badge done">done</span>'
+    if is_next:
+        return '<span class="badge next">next</span>'
+    return '<span class="badge pending">pending</span>'
+
+
+def step_13_artifact(chapter: ChapterStatus) -> str:
+    if not chapter.entities:
+        return '<span class="muted">Needs manifest (Step 1.1)</span>'
+    total = len(chapter.create_slugs)
+    if total == 0:
+        return link(chapter.entities, "Manifest (no create rows)")
+    created = len(chapter.prompt_paths)
+    summary = f"{created}/{total} prompt pages"
+    if chapter.step_done["1.3"]:
+        return f"{summary} — {link(chapter.entities, 'manifest')}"
+    return (
+        f'{summary} — see <a href="{rel_href(chapter.entities)}">manifest</a> for entity list'
+    )
+
+
+def render_chapter_card(chapter: ChapterStatus) -> str:
+    done = chapter.step_done
+    nxt = chapter.next_step()
+
+    step_files = {
+        "0": chapter.source_html,
+        "1.1": chapter.entities,
+        "1.2": chapter.screenplay,
+    }
+
+    rows = []
+    for step_id, step_name, _pattern in STEPS:
+        if step_id == "1.3":
+            artifact = step_13_artifact(chapter)
+        else:
+            artifact = link(step_files[step_id])
+        rows.append(
+            "<tr>"
+            f"<td>{status_badge(done[step_id], nxt == step_id)}</td>"
+            f"<td><strong>Step {html.escape(step_id)}</strong> — {html.escape(step_name)}</td>"
+            f"<td>{artifact}</td>"
+            "</tr>"
+        )
+
+    quick_links = (
+        "<ul class=\"quick-links\">"
+        f"<li>{link(chapter.original, 'Markdown original')}</li>"
+        f"<li>{link(chapter.source_html, 'Source HTML')}</li>"
+        f"<li>{link(chapter.entities, 'Entity manifest')}</li>"
+        f"<li>{link(chapter.screenplay, 'Screenplay')}</li>"
+        "</ul>"
+    )
+
+    return (
+        f'<article class="chapter-card" id="chapter-{html.escape(chapter.slug)}">'
+        f"<h2>{html.escape(chapter.slug)}</h2>"
+        f'<p class="chapter-status">{html.escape(chapter.progress_label())}</p>'
+        '<table class="steps"><thead><tr>'
+        "<th>Status</th><th>Step</th><th>Artifact</th>"
+        "</tr></thead><tbody>"
+        + "".join(rows)
+        + "</tbody></table>"
+        + quick_links
+        + "</article>"
+    )
+
+
+def render_file_list(title: str, paths: list[Path], empty: str) -> str:
+    if not paths:
+        return f"<section><h2>{html.escape(title)}</h2><p class=\"muted\">{html.escape(empty)}</p></section>"
+    items = "".join(f"<li>{link(path)}</li>" for path in paths)
+    return f"<section><h2>{html.escape(title)}</h2><ul class=\"file-list\">{items}</ul></section>"
+
+
+INDEX_STYLES = """
+    :root {
+      --bg: #f6f4ef;
+      --card: #fff;
+      --text: #1c1c1c;
+      --muted: #5c5c5c;
+      --border: #c4b8a8;
+      --border-strong: #9a8b78;
+      --done: #2d6a4f;
+      --next: #bc6c25;
+      --pending: #6c757d;
+      --link: #1d4ed8;
+      --zebra: #faf8f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 1.5rem;
+      max-width: 56rem;
+      margin-inline: auto;
+    }
+    h1 { font-size: 1.75rem; margin-top: 0; }
+    h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 2px solid var(--border-strong); padding-bottom: 0.35rem; }
+    a { color: var(--link); }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+    .pipeline {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .pipeline ol { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+    .chapter-card {
+      background: var(--card);
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+    .chapter-status { font-weight: 600; margin: 0.25rem 0 0.75rem; }
+    table.steps {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      border: 2px solid var(--border-strong);
+      margin-bottom: 0.75rem;
+    }
+    table.steps th, table.steps td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.steps th {
+      background: #ebe4d9;
+      border-bottom: 2px solid var(--border-strong);
+    }
+    table.steps tbody tr:nth-child(even) { background: var(--zebra); }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      color: #fff;
+    }
+    .badge.done { background: var(--done); }
+    .badge.next { background: var(--next); }
+    .badge.pending { background: var(--pending); }
+    .missing, .muted { color: var(--muted); }
+    .quick-links { font-size: 0.9rem; margin: 0; padding-left: 1.25rem; }
+    .quick-links li { margin: 0.15rem 0; }
+    section { margin: 1.5rem 0; }
+    ul.file-list { margin: 0.5rem 0; padding-left: 1.25rem; }
+    ul.file-list li { margin: 0.2rem 0; }
+    code { font-size: 0.85em; background: #f0ebe3; padding: 0.1em 0.35em; border-radius: 3px; }
+    footer { margin-top: 2rem; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 1rem; }
+"""
+
+
+def generate_index() -> str:
+    chapters = [build_chapter(slug) for slug in discover_chapters()]
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    cards = "".join(render_chapter_card(ch) for ch in chapters) or (
+        '<p class="muted">No chapters found. Add Markdown under <code>story/original/</code>.</p>'
+    )
+
+    originals = sorted(ORIGINAL_DIR.glob("*.md")) if ORIGINAL_DIR.exists() else []
+    source_html = sorted(HTML_DIR.glob("*.html")) if HTML_DIR.exists() else []
+    adapted = sorted(ADAPTED_DIR.glob("*.html")) if ADAPTED_DIR.exists() else []
+    prompts = sorted(PROMPTS_DIR.glob("*/*-base.html")) if PROMPTS_DIR.exists() else []
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Screenplay — Project Index</title>
+  <style>{INDEX_STYLES}</style>
+</head>
+<body>
+  <header>
+    <h1>Screenplay — Project Index</h1>
+    <p class="meta">Generated {html.escape(generated_at)} by <code>./read</code></p>
+  </header>
+
+  <section class="pipeline">
+    <h2>Early pipeline</h2>
+    <p>Human-led steps. Status below is inferred from files on disk.</p>
+    <ol>
+      <li><strong>Step 0</strong> — Markdown originals → <code>story/html/&lt;chapter&gt;.html</code></li>
+      <li><strong>Step 1.1</strong> — Entity manifest → <code>story/adapted/&lt;chapter&gt;-entities.html</code></li>
+      <li><strong>Step 1.2</strong> — Screenplay → <code>story/adapted/&lt;chapter&gt;-screenplay.html</code></li>
+      <li><strong>Step 1.3</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Chapters</h2>
+    {cards}
+  </section>
+
+  {render_file_list("All originals", originals, "No Markdown chapters in story/original/.")}
+  {render_file_list("All source HTML", source_html, "No converted HTML in story/html/. Run Step 0.")}
+  {render_file_list("All adapted HTML", adapted, "No adapted artifacts in story/adapted/.")}
+  {render_file_list("All entity prompts", prompts, "No entity prompt pages yet.")}
+
+  <footer>
+    Regenerate this page anytime with <code>./read</code> from the repository root.
+  </footer>
+</body>
+</html>
+"""
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--no-open",
+        action="store_true",
+        help="Generate index.html without opening a browser.",
+    )
+    args = parser.parse_args()
+
+    INDEX_PATH.write_text(generate_index(), encoding="utf-8")
+    print(f"Wrote {INDEX_PATH.relative_to(REPO_ROOT)}")
+
+    if not args.no_open:
+        webbrowser.open(INDEX_PATH.resolve().as_uri())
+        print("Opened in browser.")
+
+
+if __name__ == "__main__":
+    main()

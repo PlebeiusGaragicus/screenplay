@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Convert story/original Markdown chapters to simple anchored HTML."""
+
+from __future__ import annotations
+
+import argparse
+import html
+import re
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+ORIGINAL_DIR = REPO_ROOT / "story" / "original"
+HTML_DIR = REPO_ROOT / "story" / "html"
+
+
+def slugify(value: str) -> str:
+    value = value.strip().lower()
+    value = re.sub(r"[^a-z0-9]+", "-", value)
+    return value.strip("-") or "section"
+
+
+def strip_frontmatter(text: str) -> str:
+    lines = text.splitlines()
+    if lines and lines[0].strip() == "---":
+        for idx in range(1, len(lines)):
+            if lines[idx].strip() == "---":
+                return "\n".join(lines[idx + 1 :]).lstrip()
+    return text
+
+
+def blocks_from_markdown(text: str) -> list[str]:
+    blocks: list[str] = []
+    current: list[str] = []
+
+    for line in text.splitlines():
+        if line.strip():
+            current.append(line.rstrip())
+            continue
+
+        if current:
+            blocks.append("\n".join(current))
+            current = []
+
+    if current:
+        blocks.append("\n".join(current))
+
+    return blocks
+
+
+def render_block(block: str, paragraph_number: int) -> tuple[str, int]:
+    heading = re.match(r"^(#{1,6})\s+(.+)$", block)
+    if heading:
+        level = len(heading.group(1))
+        text = heading.group(2).strip()
+        tag = f"h{level}"
+        return f'<{tag} id="{slugify(text)}">{html.escape(text)}</{tag}>', paragraph_number
+
+    escaped = html.escape(" ".join(line.strip() for line in block.splitlines()))
+    return f'<p id="p-{paragraph_number:03d}">{escaped}</p>', paragraph_number + 1
+
+
+def convert_file(markdown_path: Path) -> Path:
+    markdown_path = markdown_path.resolve()
+    chapter = markdown_path.stem
+    output_path = HTML_DIR / f"{chapter}.html"
+    source_text = strip_frontmatter(markdown_path.read_text())
+    blocks = blocks_from_markdown(source_text)
+
+    rendered: list[str] = []
+    paragraph_number = 1
+    title = chapter.replace("-", " ").title()
+
+    for block in blocks:
+        rendered_block, paragraph_number = render_block(block, paragraph_number)
+        if rendered_block.startswith("<h1 "):
+            title = re.sub(r"<[^>]+>", "", rendered_block)
+        rendered.append(f"    {rendered_block}")
+
+    rel_source = markdown_path.relative_to(REPO_ROOT)
+    html_text = "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="en">',
+            "<head>",
+            '  <meta charset="utf-8">',
+            '  <meta name="viewport" content="width=device-width, initial-scale=1">',
+            f"  <title>{html.escape(title)}</title>",
+            "</head>",
+            "<body>",
+            f"  <!-- Generated from {html.escape(str(rel_source))}. Do not hand-edit unless intentionally diverging from source Markdown. -->",
+            f'  <article class="source-chapter" data-chapter="{html.escape(chapter)}">',
+            *rendered,
+            "  </article>",
+            "</body>",
+            "</html>",
+            "",
+        ]
+    )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(html_text)
+    return output_path
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        type=Path,
+        help="Markdown chapter paths. Defaults to story/original/*.md.",
+    )
+    args = parser.parse_args()
+
+    paths = args.paths or sorted(ORIGINAL_DIR.glob("*.md"))
+    if not paths:
+        raise SystemExit("No Markdown files found under story/original/.")
+
+    for path in paths:
+        output = convert_file(path)
+        print(f"Wrote {output.relative_to(REPO_ROOT)}")
+
+
+if __name__ == "__main__":
+    main()
