@@ -2,7 +2,7 @@
 title: Prologue - Equestria Online
 characters: [James, David, Honeycrisp, Obsidian Stripe]
 locations: [Computer Lab, Barn Interior, Forest Path, Zebra's Hut Clearing]
-prompts: ["characters/james/james.md", "characters/david/david.md", "characters/honeycrisp/honeycrisp.md", "characters/obsidian-stripe/obsidian-stripe.md", "locations/computer-lab.md", "locations/barn-interior/barn-interior.md", "locations/forest-path/forest-path.md", "locations/zebra-hut/zebra-hut.md", "styles/equestria-online/equestria-online.md"]
+prompts: ["characters/james/james.md", "characters/david/david.md", "characters/honeycrisp/honeycrisp.md", "characters/obsidian-stripe/obsidian-stripe.md", "locations/computer-lab/computer-lab.md", "locations/barn-interior/barn-interior.md", "locations/forest-path/forest-path.md", "locations/zebra-hut/zebra-hut.md", "styles/equestria-online/equestria-online.md"]
 ---
 
 # Prologue: Equestria Online
