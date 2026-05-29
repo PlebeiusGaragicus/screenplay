@@ -47,12 +47,20 @@ Maintain one project manifest by scanning **one chapter per run** and merging en
 <li data-chapter="0-prologue"><a href="../html/0-prologue.html#p-001">0-prologue p-001</a></li>
 ```
 
-When the same entity appears again in a later chapter scan, **append** a new `<li data-chapter="…">` (do not duplicate rows).
+When the same entity appears again in a later chapter scan, **append** a new `<li data-chapter="…">` to the existing `<ul class="chapter-refs">` (do not duplicate rows). Put `class="chapter-refs"` on the `<ul>`, not on the `<td>`. Only `<main data-chapters-scanned>` uses comma-separated chapter slugs; never put comma-separated slugs on `<ul>` or `<li>`.
 
 **Wrong in Step 1.1:**
 
 ```html
 <td><a href="../../prompts/james/james-base.html">James</a></td>
+```
+
+```html
+<ul data-chapter="1-opportunity,2-resources">
+```
+
+```html
+<td class="chapter-refs"><ul>...</ul></td>
 ```
 
 ## Merge rules
@@ -63,8 +71,11 @@ When scanning a chapter:
 - **Existing entity** (`id="entity-<slug>"` already present) → append a `<li data-chapter="…">` to **Chapters** only; optionally extend Notes or Fixtures if this chapter adds set dressing (keep brief).
 - **Same name, different character** → do not auto-merge; use **open questions** or human review.
 - **Deferred / skipped** → project-level lists; append chapter context in the bullet when first mentioned in that chapter.
+- **Deferred → created** — when a deferred entity first appears on screen in a chapter, add a **Created** row, append chapter `<li>` refs, and remove its bullet from **Deferred** (or note the promotion in **Open questions** if ambiguous).
 
 Slug in `id` is the global contract: `prompts/<slug>/<slug>-base.html`.
+
+On merge, preserve `<head>` and the stylesheet `<link>`; do not remove or inline CSS.
 
 ## Extraction rules
 
@@ -78,14 +89,14 @@ Slug in `id` is the global contract: `prompts/<slug>/<slug>-base.html`.
 ## Layout rules
 
 - Single file: `story/adapted/entities.html`.
-- Tables: **Characters**, **Scenes**, **Props**, **Styles** (if needed).
+- Tables: **Characters**, **Scenes**, **Props**, **Art direction** (`data-type="style"`; not page CSS).
 - Columns: **Name**, **Chapters**, **Notes** (and **Fixtures** on scene rows).
 - No Slug column; slug is in `id="entity-<slug>"`.
 - `<main class="entity-manifest" data-chapters-scanned="0-prologue,1-chapter-two">`.
 
 ## Manifest template
 
-Use this skeleton when creating the file for the first time; preserve styles and structure when merging.
+Use this skeleton when creating the file for the first time; preserve structure and the stylesheet link when merging.
 
 ```html
 <!doctype html>
@@ -93,7 +104,7 @@ Use this skeleton when creating the file for the first time; preserve styles and
 <head>
   <meta charset="utf-8">
   <title>Entity Manifest</title>
-  <!-- shared stylesheet: see story/adapted/entities.html -->
+  <link rel="stylesheet" href="../../assets/screenplay.css">
 </head>
 <body>
   <main class="entity-manifest" data-chapters-scanned="">
@@ -117,17 +128,15 @@ Use this skeleton when creating the file for the first time; preserve styles and
           </tbody>
         </table>
       </section>
-      <!-- scenes, props, styles -->
+      <!-- scenes, props, art direction (section id="styles" data-type="style") -->
     </section>
-    <section id="deferred"><h2>Deferred entities</h2><ul></ul></section>
-    <section id="skipped"><h2>Skipped proper nouns</h2><ul></ul></section>
+    <section id="deferred"><h2>Deferred entities</h2><ul class="deferred-list"></ul></section>
+    <section id="skipped"><h2>Skipped proper nouns</h2><ul class="skipped-list"></ul></section>
     <section id="open-questions"><h2>Open questions</h2><ul></ul></section>
   </main>
 </body>
 </html>
 ```
-
-Copy full CSS from the existing `story/adapted/entities.html` when bootstrapping.
 
 ## Coverage pass
 
@@ -144,6 +153,8 @@ This chapter’s slug is in `data-chapters-scanned`, and every entity found in t
 All `story/html/*.html` chapters appear in `data-chapters-scanned`.
 
 ## User Prompt
+
+The following user instructions (if provided) should help guide the above workflow.
 
 **User:** `@$`
 

@@ -86,6 +86,7 @@ def convert_file(markdown_path: Path) -> Path:
             '  <meta charset="utf-8">',
             '  <meta name="viewport" content="width=device-width, initial-scale=1">',
             f"  <title>{html.escape(title)}</title>",
+            '  <link rel="stylesheet" href="../../assets/screenplay.css">',
             "</head>",
             "<body>",
             f"  <!-- Generated from {html.escape(str(rel_source))}. Do not hand-edit unless intentionally diverging from source Markdown. -->",

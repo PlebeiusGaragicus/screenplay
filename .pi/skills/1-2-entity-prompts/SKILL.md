@@ -65,7 +65,7 @@ If **continue** finds no pending slices, report Step 1.2 complete for the projec
 
 1. Resolve entity slug and chapter slug from the manifest row.
 2. Read `story/html/<chapter>.html` (full chapter; focus on paragraphs relevant to this entity).
-3. If `prompts/<slug>/<slug>-base.html` does not exist, create it from the template (header, empty variants/inferences as needed).
+3. If `prompts/<slug>/<slug>-base.html` does not exist, create it from the template (header, stylesheet link, empty variants/inferences as needed).
 4. Add or replace `section.evidence[data-chapter="<chapter>"]` with `id="evidence-<chapter>"` and ordered blockquotes.
 5. Add or update `section.description[data-chapter="<chapter>"]` with a polished summary for **this chapter’s** material (project-wide description can synthesize later slices in place or in the same section—prefer one description section per chapter when the entity spans multiple chapters).
 6. Update **Variants** / **Fixtures** / **Inferences** when this chapter adds new forms or set dressing.
@@ -99,6 +99,7 @@ Do not batch multiple slices unless the user explicitly asks.
 <head>
   <meta charset="utf-8">
   <title>James — Base Prompt</title>
+  <link rel="stylesheet" href="../../assets/screenplay.css">
 </head>
 <body>
   <article class="entity-prompt" data-entity="james" data-type="character" data-version="base">
@@ -169,6 +170,8 @@ From `prompts/<slug>/<slug>-base.html`:
 Every `chapter-refs` item has `data-slice-done="true"`, each linked **Name** resolves to an existing prompt file, and each slice has a non-empty `#evidence-<chapter>` section.
 
 ## User Prompt
+
+The following user instructions (if provided) should help guide the above workflow.
 
 **User:** `@$`
 

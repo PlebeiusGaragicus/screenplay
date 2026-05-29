@@ -36,6 +36,7 @@ Adapt a source chapter into navigable, semantic screenplay HTML linked to the en
 <head>
   <meta charset="utf-8">
   <title>0-prologue Screenplay</title>
+  <link rel="stylesheet" href="../../assets/screenplay.css">
 </head>
 <body>
   <main class="screenplay" data-chapter="0-prologue">
@@ -62,7 +63,7 @@ The screenplay HTML covers the agreed chapter scope, uses semantic screenplay cl
 
 ## User Input
 
-The following user input (if provided) should guide the above process.
+The following user instructions (if provided) should help guide the above workflow.
 
 **User:** `$@`
 

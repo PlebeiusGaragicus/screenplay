@@ -50,6 +50,7 @@ Generated source HTML should be simple and deterministic:
 - Paragraph IDs use `p-001`, `p-002`, and so on.
 - Heading IDs are kebab-case slugs from heading text.
 - The generated file includes a comment noting the source Markdown path.
+- `<head>` must include `<link rel="stylesheet" href="../../assets/screenplay.css">` (the conversion script adds this automatically).
 - Do not add entity links in Step 1; entity links are introduced after the manifest exists.
 
 ## Done when
@@ -57,6 +58,8 @@ Generated source HTML should be simple and deterministic:
 The HTML file exists under `story/html/`, preserves the source prose order, and contains stable paragraph anchors for later provenance links. Stop there—do not continue into later pipeline steps unless the user asks.
 
 ## User Prompt
+
+The following user instructions (if provided) should help guide the above workflow.
 
 **User:** `@$`
 

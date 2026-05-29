@@ -48,6 +48,7 @@ Later visual phases are intentionally out of scope for this early pipeline. Step
 | `story/adapted/` | Project entity manifest, per-chapter screenplays |
 | `story/adapted/entities.html` | Project-wide entity catalog (Step 1.1 / 1.2) |
 | `prompts/<entity>/` | Entity prompt HTML pages and later reference assets |
+| `assets/screenplay.css` | Shared stylesheet for all pipeline HTML artifacts |
 | `.pi/mypi/agents/stan-lee.yml` | Stan-lee preset |
 | `.pi/skills/<n>-<name>/` | Step skills |
 
@@ -72,7 +73,8 @@ Later visual phases are intentionally out of scope for this early pipeline. Step
 
 - Filenames: kebab-case slugs.
 - User originals remain Markdown under `story/original/`; generated adaptation artifacts are HTML.
-- HTML should be simple, valid, and template-driven. Avoid inline styling and JavaScript in artifacts.
+- HTML should be simple, valid, and template-driven. Link the shared stylesheet `assets/screenplay.css` from every pipeline HTML file (use the correct relative `href` for that file’s depth). Do not use inline CSS or JavaScript in artifacts.
+- Stylesheet `href` by location: `story/html/` and `story/adapted/` → `../../assets/screenplay.css`; `prompts/<entity>/` → `../../assets/screenplay.css`; repo-root `index.html` → `assets/screenplay.css`.
 - Use semantic classes for screenplay structure (`scene`, `scene-heading`, `action`, `character`, `dialogue`).
 - Update this file when cross-cutting structure changes; update the relevant step skill when step behavior changes.
 
