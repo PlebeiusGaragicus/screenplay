@@ -1,9 +1,22 @@
 ---
 name: 2-adapt-screenplay
-description: Adapt source HTML into semantic Fountain-style screenplay HTML. Use when the user requests Step 2 or screenplay adaptation for a chapter.
+description: Adapt one chapter to screenplay HTML. Step 2; bare continue uses this after Step 1.2 is complete, one chapter per run.
 ---
 
 # Step 2 — Adapt screenplay
+
+## Bare continue
+
+When the user says **`continue`** and AGENTS.md routes here (Steps 1.1 and 1.2 complete for the project):
+
+1. List `story/html/*.html` chapter slugs in order; pick the first slug with no `story/adapted/<chapter>-screenplay.html`.
+2. Read **only** that chapter’s source HTML and `entities.html` (for links—not full prompt corpora).
+3. Write `story/adapted/<chapter>-screenplay.html`, then **stop**.
+
+## Persist artifacts (mandatory)
+
+- You **must** `write` or `edit` the screenplay file before ending the run.
+- **Re-read** the file to confirm it exists on disk before claiming done.
 
 ## Goal
 

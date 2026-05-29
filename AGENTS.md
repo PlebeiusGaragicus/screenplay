@@ -2,7 +2,7 @@
 
 Turn user-provided prose into a navigable HTML adaptation workspace: Markdown originals → source HTML → entity manifest → screenplay HTML → entity prompt pages → later visual phases.
 
-**Working mode:** Human-led, one unit of work per run. The **stan-lee** preset routes to the numbered skill for the step the user names. Steps 1.1 and 1.2 are project-wide with **continue** (one chapter scan, or one entity×chapter slice).
+**Working mode:** One unit of work per run. The user may name a step explicitly, or say **`continue`** alone—the agent reads `story/adapted/entities.html` and does exactly **one** next unit (one chapter scan, one entity×chapter slice, or one screenplay chapter).
 
 ---
 
@@ -18,11 +18,37 @@ The user supplies organized Markdown source chapters before agent work begins:
 
 ## How to work (stan-lee)
 
-1. The user states **step** and optionally **chapter** (e.g. Step 1, `0-prologue`; or Step 1.1 / 1.2 with **continue**).
-2. Read `.pi/skills/<n>-<name>/SKILL.md` for that step and follow it.
-3. Structural rules in this file always apply.
-4. End with: what changed, open questions, and a **suggested** next step — do not start the next step without confirmation.
-5. If a request spans steps, ask which step to do first.
+1. If the user says **`continue`** (only), follow **Bare continue** below—do not ask which step.
+2. Otherwise the user may state **step** and optionally **chapter** (e.g. Step 1, `0-prologue`).
+3. Read `.pi/skills/<n>-<name>/SKILL.md` for that step and follow it.
+4. Structural rules in this file always apply.
+5. **Persist:** use `write` or `edit` on every output file you change; re-read the file to verify before claiming done. Never report a merge or slice as complete from chat alone.
+6. End with: what changed (paths only if written), open questions, and **suggested next step** (usually “say **continue**”). Do not start a second unit in the same run.
+7. If a request spans steps, ask which step to do first.
+
+---
+
+## Bare continue
+
+Fresh context starts here—no chat history required.
+
+1. **Open** `story/adapted/entities.html` when it exists; otherwise infer Step 1 or Step 1.1 from `story/html/` and `story/original/`.
+2. **Read first** (top of manifest, in order):
+   - `#pipeline-next-1-1` and `data-chapters-scanned` on `<main>`
+   - `#pipeline-next-1-2` and `data-next-step`, `data-next-entity`, `data-next-chapter` on `<main>`
+3. **Pick exactly one skill** (first match wins):
+
+| Condition | Skill | One unit |
+|-----------|--------|----------|
+| Some `story/html/*.html` missing and user has not finished Step 1 | `1-0-convert-to-html` | One `story/original/<chapter>.md` → HTML |
+| `entities.html` missing, or any HTML chapter not in `data-chapters-scanned` | `1-1-entity-manifest` | Scan **one** chapter (`#pipeline-next-1-1` / `data-next-chapter`) |
+| Step 1.1 complete and any appearance `<li>` lacks `data-slice-done="true"` | `1-2-entity-prompts` | **One** entity×chapter slice (`#pipeline-next-1-2` / `data-next-entity` + `data-next-chapter`) |
+| Step 1.2 complete and a chapter lacks `story/adapted/<chapter>-screenplay.html` | `2-adapt-screenplay` | **One** screenplay chapter (first missing in slug order) |
+
+4. Read that skill’s `SKILL.md`, do **only** that unit, update manifest **pipeline-next** lines and `data-next-*` before stopping.
+5. **Context limit:** for Step 1.1 and 1.2, read **only** the single chapter HTML named in pipeline-next—not other chapters, not the full book.
+
+If pipeline-next text disagrees with the table, fix the manifest when you write and prefer the table logic for routing.
 
 ---
 
@@ -59,12 +85,13 @@ Later visual phases are intentionally out of scope for this early pipeline. Step
 - Artifacts use real HTML links, not wiki links.
 - Use relative `href` values so files work in a browser from the local filesystem.
 - Generated source paragraphs use stable IDs like `p-001`; provenance links should point to `../html/<chapter>.html#p-001` or equivalent relative paths.
-- **Project manifest** (`story/adapted/entities.html`): `data-chapters-scanned` lists chapters merged in Step 1.1. Each entity row has **Chapters** (`ul.chapter-refs` with `data-chapter` per appearance).
-- **Name cells:** plain text until Step 1.2 creates `prompts/<slug>/<slug>-base.html`, then link (entity opened—not “all chapters done”).
-- **Chapter refs:** pending slices link to source HTML only; `data-slice-done="true"` links to `#evidence-<chapter>` on the prompt page plus source `p-xxx` in parentheses.
+- **Project manifest** (`story/adapted/entities.html`): `data-chapters-scanned` lists chapters merged in Step 1.1. Each entity row has **Appearances** (`ul.chapter-refs` with `data-chapter` per chapter where the entity is **named or referred to** in prose). Top of manifest: `p.pipeline-next` lines and `data-next-*` on `<main>` — agents update these every run so the next unit of work is obvious.
+- **Name cells:** plain text until Step 1.2 creates `prompts/<slug>/<slug>-base.html`, then link (entity opened—not “all appearances done”).
+- **Appearance refs:** pending slices link to source HTML only; `data-slice-done="true"` links to `#evidence-<chapter>` on the prompt page plus source `p-xxx` in parentheses.
+- **Entity prompt pages:** `section.appearances` at the top mirrors the manifest appearance list; keep `data-chapter` and `data-slice-done` in sync with the manifest on every Step 1.2 run.
 - Screenplay (per chapter) links to `entities.html` and to prompt pages when they exist.
 - **Step 1.1 complete:** every `story/html/<chapter>.html` slug is in `data-chapters-scanned`.
-- **Step 1.2 complete:** every `chapter-refs` item has `data-slice-done="true"` and a non-empty evidence section on the prompt page.
+- **Step 1.2 complete:** every `chapter-refs` item has `data-slice-done="true"`, matching `section.appearances` on the prompt page, and a non-empty evidence section for that chapter.
 - **Retired:** `story/adapted/<chapter>-entities.html` — do not create.
 
 ---
@@ -101,10 +128,10 @@ Run from the repository root:
 ./read
 ```
 
-Regenerates `index.html` from files on disk (chapters, pipeline step status, links) and opens it in a browser. Use `./read --no-open` to generate without launching.
+Regenerates `index.html` with links to HTML artifacts on disk (chapters, manifest, entity prompts, screenplays) and opens it in a browser. Use `./read --no-open` to generate without launching. Pipeline progress is not tracked on the index — agents infer step state from artifacts (especially `story/adapted/entities.html`).
 
 ---
 
 ## Preset
 
-**stan-lee** (`.pi/mypi/agents/stan-lee.yml`): comic adaptation assistant. Project context includes this file via `includeContextFiles`. The human chooses the step; the agent reads the matching skill under `.pi/skills/`.
+**stan-lee** (`.pi/mypi/agents/stan-lee.yml`): comic adaptation assistant. Project context includes this file via `includeContextFiles`. **`continue`** alone is valid; the agent routes from `entities.html` and reads the matching skill under `.pi/skills/`.

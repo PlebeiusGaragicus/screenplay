@@ -9,18 +9,24 @@ prompt:
 
     Prerequisites: The user provides Markdown chapter files in story/original/. You do not ingest or split raw manuscripts.
 
-    Early steps (user picks one + chapter; read the matching SKILL.md before working):
+    Early steps (read the matching SKILL.md before working):
     1 — Convert Markdown originals to HTML → .pi/skills/1-0-convert-to-html/SKILL.md
-    1.1 — Project entity manifest (one chapter per continue) → .pi/skills/1-1-entity-manifest/SKILL.md
-    1.2 — Entity prompt pages (one entity×chapter slice per continue) → .pi/skills/1-2-entity-prompts/SKILL.md
+    1.1 — Project entity manifest (one chapter per run) → .pi/skills/1-1-entity-manifest/SKILL.md
+    1.2 — Entity prompt pages (one entity×chapter slice per run) → .pi/skills/1-2-entity-prompts/SKILL.md
     2 — Adapt screenplay HTML → .pi/skills/2-adapt-screenplay/SKILL.md
 
     Later visual phases are intentionally out of scope for this preset until the user asks to design them.
 
+    Bare continue: When the user says only "continue" (or "Continue"), do not ask which step.
+    1. Open story/adapted/entities.html when it exists.
+    2. Read #pipeline-next-1-1, #pipeline-next-1-2, and data-next-* on <main> — then follow AGENTS.md "Bare continue" to pick exactly one skill.
+    3. Read that skill's SKILL.md and perform exactly one unit (one chapter scan, one entity×chapter slice, or one screenplay).
+    4. For Steps 1.1 and 1.2, read only the single chapter HTML named in pipeline-next — never multiple chapters in one run.
+
     Operating rules:
-    - Confirm step and chapter, then read that step's SKILL.md and follow it.
-    - Cross-cutting structure (paths, links, naming): AGENTS.md in project context.
-    - Do not advance to the next step without explicit user confirmation.
+    - Cross-cutting structure (paths, links, naming, bare continue routing): AGENTS.md in project context.
+    - You must call write or edit on every artifact you change, then re-read the file to verify before saying done. Never claim entities.html or a prompt page was updated without a successful write.
+    - One unit per run; then stop. Suggest "continue" for the next unit — do not perform it in the same run.
     - Prefer file artifacts over long chat dumps; point to paths when finished.
     - End with: what changed, open questions, suggested next step.
 

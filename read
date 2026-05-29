@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate index.html for the screenplay workspace and open it in a browser."""
+"""Generate index.html — navigation hub for workspace HTML artifacts."""
 
 from __future__ import annotations
 
@@ -7,402 +7,193 @@ import argparse
 import html
 import re
 import webbrowser
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
 INDEX_PATH = REPO_ROOT / "index.html"
 
-ORIGINAL_DIR = REPO_ROOT / "story" / "original"
-HTML_DIR = REPO_ROOT / "story" / "html"
-ADAPTED_DIR = REPO_ROOT / "story" / "adapted"
-PROMPTS_DIR = REPO_ROOT / "prompts"
-MANIFEST_PATH = ADAPTED_DIR / "entities.html"
+MANIFEST = REPO_ROOT / "story" / "adapted" / "entities.html"
 
-STEPS = [
-    ("1", "Convert to HTML", "story/html/<chapter>.html"),
-    ("1.1", "Entity manifest", "story/adapted/entities.html"),
-    ("1.2", "Entity prompts", "prompts/<slug>/<slug>-base.html"),
-    ("2", "Screenplay", "story/adapted/<chapter>-screenplay.html"),
-]
-
-
-@dataclass
-class ManifestSlice:
-    entity_slug: str
-    chapter_slug: str
-    done: bool
-
-
-@dataclass
-class ProjectStatus:
-    manifest_path: Path | None = None
-    chapters_scanned: list[str] = field(default_factory=list)
-    html_chapters: list[str] = field(default_factory=list)
-    entity_slugs: list[str] = field(default_factory=list)
-    slices: list[ManifestSlice] = field(default_factory=list)
-    names_linked: int = 0
-
-    @property
-    def slices_done(self) -> int:
-        return sum(1 for s in self.slices if s.done)
-
-    @property
-    def slices_total(self) -> int:
-        return len(self.slices)
-
-    @property
-    def step_11_done(self) -> bool:
-        if not self.html_chapters:
-            return False
-        return set(self.html_chapters) <= set(self.chapters_scanned)
-
-    @property
-    def step_12_done(self) -> bool:
-        return self.slices_total > 0 and self.slices_done == self.slices_total
-
-    def next_project_step(self) -> str | None:
-        if not self.step_11_done and self.html_chapters:
-            return "1.1"
-        if self.manifest_path and not self.step_12_done and self.slices_total > 0:
-            return "1.2"
-        if self.manifest_path and not self.step_12_done and self.step_11_done:
-            return "1.2"
-        return None
-
-
-@dataclass
-class ChapterStatus:
-    slug: str
-    original: Path | None = None
-    source_html: Path | None = None
-    screenplay: Path | None = None
-
-    def step_done(self, project: ProjectStatus) -> dict[str, bool]:
-        chapter_slices = [s for s in project.slices if s.chapter_slug == self.slug]
-        if chapter_slices:
-            slices_ok = all(s.done for s in chapter_slices)
-        else:
-            slices_ok = self.slug in project.chapters_scanned
-        return {
-            "1": self.source_html is not None,
-            "1.1": self.slug in project.chapters_scanned,
-            "1.2": slices_ok,
-            "2": self.screenplay is not None,
-        }
-
-    def next_step(self, project: ProjectStatus) -> str | None:
-        done = self.step_done(project)
-        if not done["1"]:
-            return "1"
-        if not done["2"]:
-            return "2"
-        return None
-
-    def progress_label(self, project: ProjectStatus) -> str:
-        done = self.step_done(project)
-        if done["2"]:
-            return "Screenplay done"
-        if not done["1"]:
-            return "Next: Step 1"
-        if not done["1.1"]:
-            return "Not scanned in manifest yet"
-        ch_slices = [s for s in project.slices if s.chapter_slug == self.slug]
-        if ch_slices and not done["1.2"]:
-            n = sum(1 for s in ch_slices if s.done)
-            return f"Prompt slices {n}/{len(ch_slices)} for this chapter"
-        if done["1.2"] and not done["2"]:
-            return "Next: Step 2"
-        return "In progress"
+PIPELINE_STEPS = """\
+  <section class="index-section index-pipeline" id="steps">
+    <h2>Pipeline steps</h2>
+    <ol>
+      <li><strong>Step 1</strong> — Convert to HTML → <code>story/html/&lt;chapter&gt;.html</code></li>
+      <li><strong>Step 1.1</strong> — Entity manifest → <code>story/adapted/entities.html</code></li>
+      <li><strong>Step 1.2</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code></li>
+      <li><strong>Step 2</strong> — Screenplay → <code>story/adapted/&lt;chapter&gt;-screenplay.html</code></li>
+    </ol>
+  </section>
+"""
+TITLE_RE = re.compile(r"<title[^>]*>([^<]+)</title>", re.IGNORECASE)
 
 
 def rel_href(path: Path) -> str:
     return html.escape(path.relative_to(REPO_ROOT).as_posix())
 
 
-def link(path: Path | None, label: str | None = None) -> str:
-    if path is None:
-        return '<span class="missing">—</span>'
+def link(path: Path, label: str | None = None) -> str:
     text = html.escape(label or path.name)
     return f'<a href="{rel_href(path)}">{text}</a>'
 
 
-def slice_evidence_present(prompt_path: Path, chapter_slug: str) -> bool:
-    if not prompt_path.exists():
-        return False
-    text = prompt_path.read_text(encoding="utf-8")
-    marker = f'id="evidence-{chapter_slug}"'
-    if marker not in text and f"data-chapter=\"{chapter_slug}\"" not in text:
-        return False
-    return "<blockquote" in text
+def page_title(path: Path) -> str | None:
+    if not path.is_file():
+        return None
+    head = path.read_text(encoding="utf-8", errors="replace")[:8192]
+    match = TITLE_RE.search(head)
+    if not match:
+        return None
+    return match.group(1).strip()
 
 
-def parse_project_manifest() -> ProjectStatus:
-    project = ProjectStatus()
-    if HTML_DIR.exists():
-        project.html_chapters = sorted(p.stem for p in HTML_DIR.glob("*.html"))
-    if not MANIFEST_PATH.exists():
-        return project
-
-    project.manifest_path = MANIFEST_PATH
-    text = MANIFEST_PATH.read_text(encoding="utf-8")
-
-    scanned = re.search(r'data-chapters-scanned="([^"]*)"', text, flags=re.IGNORECASE)
-    if scanned:
-        raw = scanned.group(1).strip()
-        project.chapters_scanned = [s.strip() for s in raw.split(",") if s.strip()]
-
-    for match in re.finditer(
-        r'<tr id="entity-([^"]+)">(.*?)</tr>',
-        text,
-        flags=re.IGNORECASE | re.DOTALL,
-    ):
-        entity_slug = match.group(1).strip()
-        row = match.group(2)
-        project.entity_slugs.append(entity_slug)
-
-        if re.search(
-            r'href="../../prompts/([^"/]+)/\1-base\.html"',
-            row,
-            flags=re.IGNORECASE,
-        ):
-            project.names_linked += 1
-
-        prompt_path = PROMPTS_DIR / entity_slug / f"{entity_slug}-base.html"
-
-        for li_match in re.finditer(
-            r"<li\s+([^>]*?)>(.*?)</li>",
-            row,
-            flags=re.IGNORECASE | re.DOTALL,
-        ):
-            attrs = li_match.group(1)
-            ch_match = re.search(r'data-chapter="([^"]+)"', attrs, flags=re.IGNORECASE)
-            if not ch_match:
-                continue
-            chapter_slug = ch_match.group(1).strip()
-            done = 'data-slice-done="true"' in attrs
-            if not done:
-                done = slice_evidence_present(prompt_path, chapter_slug)
-            project.slices.append(
-                ManifestSlice(entity_slug, chapter_slug, done)
-            )
-
-    return project
+def chapter_sort_key(slug: str) -> tuple[int, str]:
+    prefix = slug.split("-", 1)[0]
+    if prefix.isdigit():
+        return (int(prefix), slug)
+    return (999_999, slug)
 
 
-def discover_chapters() -> list[str]:
+def chapter_slugs() -> list[str]:
     slugs: set[str] = set()
-    if ORIGINAL_DIR.exists():
-        slugs.update(p.stem for p in ORIGINAL_DIR.glob("*.md"))
-    if HTML_DIR.exists():
-        slugs.update(p.stem for p in HTML_DIR.glob("*.html"))
-    if ADAPTED_DIR.exists():
-        for path in ADAPTED_DIR.glob("*-screenplay.html"):
+    html_dir = REPO_ROOT / "story" / "html"
+    original_dir = REPO_ROOT / "story" / "original"
+    adapted_dir = REPO_ROOT / "story" / "adapted"
+    if html_dir.is_dir():
+        slugs.update(p.stem for p in html_dir.glob("*.html"))
+    if original_dir.is_dir():
+        slugs.update(p.stem for p in original_dir.glob("*.md"))
+    if adapted_dir.is_dir():
+        for path in adapted_dir.glob("*-screenplay.html"):
             slugs.add(path.name[: -len("-screenplay.html")])
-    return sorted(slugs)
+    return sorted(slugs, key=chapter_sort_key)
 
 
-def build_chapter(slug: str) -> ChapterStatus:
-    chapter = ChapterStatus(slug=slug)
-    original = ORIGINAL_DIR / f"{slug}.md"
-    source_html = HTML_DIR / f"{slug}.html"
-    screenplay = ADAPTED_DIR / f"{slug}-screenplay.html"
-
-    if original.exists():
-        chapter.original = original
-    if source_html.exists():
-        chapter.source_html = source_html
-    if screenplay.exists():
-        chapter.screenplay = screenplay
-
-    return chapter
-
-
-def status_badge(done: bool, is_next: bool) -> str:
-    if done:
-        return '<span class="badge done">done</span>'
-    if is_next:
-        return '<span class="badge next">next</span>'
-    return '<span class="badge pending">pending</span>'
+def manifest_entities() -> list[tuple[str, str]]:
+    """Entity (slug, display name) rows in manifest table order."""
+    if not MANIFEST.is_file():
+        return []
+    text = MANIFEST.read_text(encoding="utf-8")
+    entities: list[tuple[str, str]] = []
+    for match in re.finditer(
+        r'<tr id="entity-([^"]+)">\s*<td>([^<]+)</td>',
+        text,
+        flags=re.IGNORECASE,
+    ):
+        entities.append((match.group(1).strip(), match.group(2).strip()))
+    return entities
 
 
-def step_11_artifact_chapter(chapter: ChapterStatus, project: ProjectStatus) -> str:
-    if chapter.slug in project.chapters_scanned:
-        return '<span class="muted">Merged into project manifest</span>'
-    if chapter.source_html:
-        return '<span class="muted">Not scanned yet — continue Step 1.1</span>'
-    return '<span class="missing">—</span>'
+def render_chapter_cards(slugs: list[str]) -> str:
+    if not slugs:
+        return '<p class="muted">No chapters yet. Add Markdown under <code>story/original/</code> and run Step 1.</p>'
 
+    cards: list[str] = []
+    html_dir = REPO_ROOT / "story" / "html"
+    adapted_dir = REPO_ROOT / "story" / "adapted"
 
-def step_12_artifact_chapter(chapter: ChapterStatus, project: ProjectStatus) -> str:
-    ch_slices = [s for s in project.slices if s.chapter_slug == chapter.slug]
-    if not ch_slices:
-        if chapter.slug in project.chapters_scanned:
-            return '<span class="muted">No entities in this chapter</span>'
-        return '<span class="muted">Scan chapter in Step 1.1 first</span>'
-    done = sum(1 for s in ch_slices if s.done)
-    return f"{done}/{len(ch_slices)} slices — {link(project.manifest_path, 'manifest')}"
+    for slug in slugs:
+        source = html_dir / f"{slug}.html"
+        screenplay = adapted_dir / f"{slug}-screenplay.html"
+        title = page_title(source) if source.is_file() else None
+        heading = html.escape(title) if title else html.escape(slug)
 
+        links: list[str] = []
+        if source.is_file():
+            links.append(f"<li>{link(source, 'Source HTML')}</li>")
+        if screenplay.is_file():
+            links.append(f"<li>{link(screenplay, 'Screenplay')}</li>")
+        if not links:
+            links.append('<li><span class="muted">No HTML for this chapter yet</span></li>')
 
-def render_project_card(project: ProjectStatus) -> str:
-    nxt = project.next_project_step()
-    scanned = len(project.chapters_scanned)
-    html_total = len(project.html_chapters)
-    scan_summary = f"{scanned}/{html_total} chapters scanned" if html_total else "No source HTML yet"
-    slice_summary = (
-        f"{project.slices_done}/{project.slices_total} entity×chapter slices"
-        if project.slices_total
-        else "No entities in manifest"
-    )
-    names_summary = (
-        f"{project.names_linked}/{len(project.entity_slugs)} entities opened"
-        if project.entity_slugs
-        else "—"
-    )
-
-    rows = [
-        "<tr>"
-        f"<td>{status_badge(project.step_11_done, nxt == '1.1')}</td>"
-        "<td><strong>Step 1.1</strong> — Entity manifest (project)</td>"
-        f"<td>{scan_summary} — {link(project.manifest_path, 'entities.html')}</td>"
-        "</tr>",
-        "<tr>"
-        f"<td>{status_badge(project.step_12_done, nxt == '1.2')}</td>"
-        "<td><strong>Step 1.2</strong> — Entity prompts (project)</td>"
-        f"<td>{slice_summary}; {names_summary}</td>"
-        "</tr>",
-    ]
-
-    label = "Project pipeline"
-    if project.step_12_done:
-        label += " — early entity phases complete"
-    elif nxt:
-        label += f" — continue Step {nxt}"
-
-    return (
-        '<article class="chapter-card project-card">'
-        f"<h2>{html.escape(label)}</h2>"
-        '<table class="steps"><thead><tr>'
-        "<th>Status</th><th>Step</th><th>Artifact</th>"
-        "</tr></thead><tbody>"
-        + "".join(rows)
-        + "</tbody></table>"
-        f'<p class="quick-links"><a href="{rel_href(MANIFEST_PATH)}">Open entity manifest</a></p>'
-        "</article>"
-    )
-
-
-def render_chapter_card(chapter: ChapterStatus, project: ProjectStatus) -> str:
-    done = chapter.step_done(project)
-    nxt = chapter.next_step(project)
-
-    rows = []
-    for step_id, step_name, _pattern in STEPS:
-        if step_id == "1.1":
-            artifact = step_11_artifact_chapter(chapter, project)
-        elif step_id == "1.2":
-            artifact = step_12_artifact_chapter(chapter, project)
-        elif step_id == "1":
-            artifact = link(chapter.source_html)
-        else:
-            artifact = link(chapter.screenplay)
-        is_next = nxt == step_id
-        rows.append(
-            "<tr>"
-            f"<td>{status_badge(done[step_id], is_next)}</td>"
-            f"<td><strong>Step {html.escape(step_id)}</strong> — {html.escape(step_name)}</td>"
-            f"<td>{artifact}</td>"
-            "</tr>"
+        cards.append(
+            f'<article class="nav-card">'
+            f"<h3>{heading}</h3>"
+            f'<p class="slug"><code>{html.escape(slug)}</code></p>'
+            f'<ul class="nav-list">{"".join(links)}</ul>'
+            "</article>"
         )
 
-    quick_links = (
-        "<ul class=\"quick-links\">"
-        f"<li>{link(chapter.original, 'Markdown original')}</li>"
-        f"<li>{link(chapter.source_html, 'Source HTML')}</li>"
-        f"<li>{link(project.manifest_path, 'Entity manifest')}</li>"
-        f"<li>{link(chapter.screenplay, 'Screenplay')}</li>"
-        "</ul>"
-    )
-
-    return (
-        f'<article class="chapter-card" id="chapter-{html.escape(chapter.slug)}">'
-        f"<h2>{html.escape(chapter.slug)}</h2>"
-        f'<p class="chapter-status">{html.escape(chapter.progress_label(project))}</p>'
-        '<table class="steps"><thead><tr>'
-        "<th>Status</th><th>Step</th><th>Artifact</th>"
-        "</tr></thead><tbody>"
-        + "".join(rows)
-        + "</tbody></table>"
-        + quick_links
-        + "</article>"
-    )
+    return f'<div class="nav-grid">{"".join(cards)}</div>'
 
 
-def render_file_list(title: str, paths: list[Path], empty: str) -> str:
-    if not paths:
-        return f"<section><h2>{html.escape(title)}</h2><p class=\"muted\">{html.escape(empty)}</p></section>"
-    items = "".join(f"<li>{link(path)}</li>" for path in paths)
-    return f"<section><h2>{html.escape(title)}</h2><ul class=\"file-list\">{items}</ul></section>"
+def render_entity_cards(entities: list[tuple[str, str]]) -> str:
+    if not entities:
+        return '<p class="muted">No entities in the manifest yet.</p>'
+
+    prompts_dir = REPO_ROOT / "prompts"
+    cards: list[str] = []
+    for slug, name in entities:
+        prompt = prompts_dir / slug / f"{slug}-base.html"
+        heading = html.escape(name)
+        links: list[str] = []
+        if prompt.is_file():
+            links.append(f"<li>{link(prompt, 'Base prompt')}</li>")
+        else:
+            links.append('<li><span class="muted">No prompt page yet</span></li>')
+        cards.append(
+            f'<article class="nav-card">'
+            f"<h3>{heading}</h3>"
+            f'<p class="slug"><code>{html.escape(slug)}</code></p>'
+            f'<ul class="nav-list">{"".join(links)}</ul>'
+            "</article>"
+        )
+
+    return f'<div class="nav-grid">{"".join(cards)}</div>'
 
 
 def generate_index() -> str:
-    project = parse_project_manifest()
-    chapters = [build_chapter(slug) for slug in discover_chapters()]
+    slugs = chapter_slugs()
+    entities = manifest_entities()
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-    project_card = render_project_card(project)
-    cards = "".join(render_chapter_card(ch, project) for ch in chapters) or (
-        '<p class="muted">No chapters found. Add Markdown under <code>story/original/</code>.</p>'
-    )
+    manifest_block = ""
+    if MANIFEST.is_file():
+        title = page_title(MANIFEST) or "Entity manifest"
+        manifest_block = (
+            '<section class="index-section" id="manifest">'
+            "<h2>Entity manifest</h2>"
+            f'<ul class="nav-list"><li>{link(MANIFEST, title)}</li></ul>'
+            "</section>"
+        )
 
-    originals = sorted(ORIGINAL_DIR.glob("*.md")) if ORIGINAL_DIR.exists() else []
-    source_html = sorted(HTML_DIR.glob("*.html")) if HTML_DIR.exists() else []
-    adapted = sorted(ADAPTED_DIR.glob("*.html")) if ADAPTED_DIR.exists() else []
-    prompts = sorted(PROMPTS_DIR.glob("*/*-base.html")) if PROMPTS_DIR.exists() else []
+    entities_section = ""
+    if entities:
+        entities_section = (
+            '<section class="index-section" id="entities">'
+            "<h2>Entities</h2>"
+            f"{render_entity_cards(entities)}"
+            "</section>"
+        )
 
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Screenplay — Project Index</title>
+  <title>Screenplay — Navigate</title>
   <link rel="stylesheet" href="assets/screenplay.css">
 </head>
-<body>
-  <header>
-    <h1>Screenplay — Project Index</h1>
-    <p class="meta">Generated {html.escape(generated_at)} by <code>./read</code></p>
+<body class="project-index">
+  <header class="index-header">
+    <h1>Screenplay</h1>
+    <p class="meta">Navigation index · generated {html.escape(generated_at)} · <code>./read</code></p>
   </header>
 
-  <section class="pipeline">
-    <h2>Early pipeline</h2>
-    <p>Human-led steps. Status below is inferred from files on disk.</p>
-    <ol>
-      <li><strong>Step 1</strong> — Markdown originals → <code>story/html/&lt;chapter&gt;.html</code></li>
-      <li><strong>Step 1.1</strong> — Project manifest → <code>story/adapted/entities.html</code> (one chapter per continue)</li>
-      <li><strong>Step 1.2</strong> — Entity prompts → <code>prompts/&lt;slug&gt;/&lt;slug&gt;-base.html</code> (one entity×chapter slice per continue)</li>
-      <li><strong>Step 2</strong> — Screenplay → <code>story/adapted/&lt;chapter&gt;-screenplay.html</code></li>
-    </ol>
-  </section>
+  {PIPELINE_STEPS}
 
-  <section>
-    <h2>Project (Steps 1.1 &amp; 1.2)</h2>
-    {project_card}
-  </section>
-
-  <section>
+  <section class="index-section" id="chapters">
     <h2>Chapters</h2>
-    {cards}
+    {render_chapter_cards(slugs)}
   </section>
 
-  {render_file_list("All originals", originals, "No Markdown chapters in story/original/.")}
-  {render_file_list("All source HTML", source_html, "No converted HTML in story/html/. Run Step 1.")}
-  {render_file_list("All adapted HTML", adapted, "No adapted artifacts in story/adapted/.")}
-  {render_file_list("All entity prompts", prompts, "No entity prompt pages yet.")}
+  {manifest_block}
+
+  {entities_section}
 
   <footer>
-    Regenerate this page anytime with <code>./read</code> from the repository root.
+    Regenerate with <code>./read</code> from the repository root.
   </footer>
 </body>
 </html>
@@ -414,7 +205,7 @@ def main() -> None:
     parser.add_argument(
         "--no-open",
         action="store_true",
-        help="Generate index.html without opening a browser.",
+        help="Write index.html without opening a browser.",
     )
     args = parser.parse_args()
 

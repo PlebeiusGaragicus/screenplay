@@ -1,9 +1,16 @@
 ---
 name: 1-0-convert-to-html
-description: Convert user-provided Markdown originals into stable source HTML with paragraph anchors. Use when the user requests Step 1 or Markdown-to-HTML conversion for story originals.
+description: Convert one Markdown chapter to source HTML. Step 1; bare continue uses this only when a chapter lacks story/html output.
 ---
 
 # Step 1 — Convert originals
+
+## Bare continue
+
+When the user says **`continue`** and a `story/original/<chapter>.md` exists without matching `story/html/<chapter>.html`:
+
+1. Run the conversion script for **one** chapter (first missing in slug order unless the user named a chapter).
+2. **Stop**—do not read or summarize the HTML in the same run (see After converting).
 
 ## Goal
 
